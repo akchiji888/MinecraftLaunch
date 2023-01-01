@@ -47,7 +47,6 @@ namespace MinecraftLaunch.Modules.Analyzers
                 }
 
                 var fatals = Regex.Matches(Log, @"/FATAL] [\w\W]+?(?=[\n]+\[)").Select(x => x.Value).ToList();
-                Trace.WriteLine($"[Crash] 开始进行 Minecraft 日志堆栈分析，发现 {fatals.Count} 个报错项");
                 if (fatals.Count > 0)
                 {
                     var keywords = new List<string>();
@@ -61,13 +60,11 @@ namespace MinecraftLaunch.Modules.Analyzers
                     }
                 }
             }
-            else Trace.WriteLine("[Crash] 可能并未安装 Mod，不进行堆栈分析");
 
             AccurateLogMatching();
             Done:
             if(CrashReason.Count != 0)
             {
-                Trace.WriteLine($"[Crash] 分析崩溃原因完成，找到 {CrashReason.Count} 条可能的原因");
                 CrashReason.Keys.ToList().ForEach(x => Trace.WriteLine($"[Crash]  - {x}"));
                 return CrashReason;
             }
@@ -96,8 +93,6 @@ namespace MinecraftLaunch.Modules.Analyzers
         {
             if (string.IsNullOrEmpty(Log))
                 throw new ArgumentNullException("没有任何日志，已中止崩溃分析");
-
-            Trace.WriteLine("[Crash] 开始分析日志");
 
             if (Log.Contains("Unable to make protected final java.lang.Class java.lang.ClassLoader.defineClass") ||
                 Log.Contains("Unsupported class file major version") || Log.Contains("because module java.base does not export") ||
@@ -225,8 +220,6 @@ namespace MinecraftLaunch.Modules.Analyzers
                 if(item.ToLower().Contains(".jar") || isfabricmod && item.StartsWith("\t" + "\t") && !Regex.IsMatch(item,@"\t\tfabric[\w-]*: Fabric"))
                     modIdlines.Add(item);
 
-            Trace.WriteLine($"[Crash] 找到 {modIdlines.Count} 个可能的Mod行");
-
             var hintlines = new List<string>();
             foreach (var item in keywords)
             {
@@ -240,9 +233,7 @@ namespace MinecraftLaunch.Modules.Analyzers
                     break;
                 }
             }
-            hintlines = hintlines.Where((x, x1) => !x.Equals(hintlines[x1])).ToList();
-            Trace.WriteLine($"[Crash] 找到 {hintlines.Count} 个可能的崩溃Mod行");
-            Trace.WriteLine("如下所示：");
+            hintlines = hintlines.Distinct().ToList();
             hintlines.ForEach(x => Trace.WriteLine($"[Crash] - {x}"));
 
             //fuck the regex 正则我日你仙人
@@ -254,9 +245,6 @@ namespace MinecraftLaunch.Modules.Analyzers
                 else name = Regex.Match(line,@"(?<=\()[^\t]+.jar(?=\))|(?<=(\t\t)|(\| ))[^\t\|]+.jar", RegexOptions.IgnoreCase).Value;
                 if (!string.IsNullOrEmpty(name)) mods.Add(name);
             }
-
-            Trace.WriteLine($"[Crash] 找到 {mods.Count} 个可能的崩溃Mod文件名");
-            mods.ForEach(x => Trace.WriteLine($"[Crash] - {x}"));
 
             return mods.Count is 0 ? Array.Empty<string>().ToList() : mods;
         }
