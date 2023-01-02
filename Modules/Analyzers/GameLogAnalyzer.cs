@@ -21,7 +21,7 @@ namespace MinecraftLaunch.Modules.Analyzers
 
             return new()
             {
-                Log = GetSourceLog(log),
+                Source = GetSource(log),
                 Time = Regex.IsMatch(log, "(20|21|22|23|[0-1]\\d):[0-5]\\d:[0-5]\\d", RegexOptions.Compiled) ? GetLogTime(log) : DateTime.Now.ToString(),
                 LogType = GetLogType(log) switch
                 {
@@ -60,11 +60,19 @@ namespace MinecraftLaunch.Modules.Analyzers
         /// </summary>
         /// <param name="log"></param>
         /// <returns></returns>
-        public static string GetSourceLog(string log)
+        public static string GetSource(string log)
         {
             var content = Regex.Match(log, $"[\\w\\W\\s]{{2,}}/(FATAL|ERROR|WARN|INFO|DEBUG)", RegexOptions.Compiled).Value.Split('/').FirstOrDefault();
             return content?.Replace($"{Regex.Match(log, $"\\[(20|21|22|23|[0-1]\\d):[0-5]\\d:[0-5]\\d\\]").Value} [", string.Empty)!;
         }
+
+        /// <summary>
+        /// 获取日志所有前缀
+        /// </summary>
+        /// <param name="log"></param>
+        /// <returns></returns>
+        public static string GetTotalPrefix(string log) =>
+            Regex.Match(log, $"\\[(20|21|22|23|[0-1]\\d):[0-5]\\d:[0-5]\\d\\] \\[[\\w\\W\\s]{{2,}}/(FATAL|ERROR|WARN|INFO|DEBUG)\\]", RegexOptions.Compiled).Value;
 
         /// <summary>
         /// 获取日志时间
