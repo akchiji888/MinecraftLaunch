@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualBasic;
 using MinecraftLaunch.Modules.Enum;
+using MinecraftLaunch.Modules.Interface;
 using MinecraftLaunch.Modules.Models.Download;
 using MinecraftLaunch.Modules.Models.Launch;
 using System;
@@ -17,12 +18,12 @@ namespace MinecraftLaunch.Modules.Analyzers
     /// <summary>
     /// 游戏崩溃分析器
     /// </summary>
-    public partial class GameCrashAnalyzer
+    public partial class GameCrashAnalyzer : IAnalyzer<Dictionary<CrashReason, List<string>>>
     {
         /// <summary>
         /// 崩溃分析方法
         /// </summary>
-        public Dictionary<CrashReason, List<string>> AnalyzerAsync()
+        public Dictionary<CrashReason, List<string>> AnalyseAsync()
         {
             Trace.WriteLine("[Crash] 开始分析崩溃原因");
             var log = Log.ToLower();
