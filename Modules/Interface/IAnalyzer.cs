@@ -11,6 +11,10 @@ namespace MinecraftLaunch.Modules.Interface
     /// </summary>
     public interface IAnalyzer<T>
     {
+        /// <summary>
+        /// 分析方法
+        /// </summary>
+        /// <returns></returns>
         T AnalyseAsync();
     }
 }
