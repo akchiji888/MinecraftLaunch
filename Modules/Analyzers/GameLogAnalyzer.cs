@@ -17,7 +17,7 @@ namespace MinecraftLaunch.Modules.Analyzers
     {
         public static GameLogAnalyseResponse AnalyseAsync(string log)
         {
-            GameLogAnalyseResponse response = null
+            GameLogAnalyseResponse response = null;
 
             return new()
             {
