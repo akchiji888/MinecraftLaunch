@@ -17,8 +17,10 @@
 + Minecraft的参数生成、启动封装
 + 对离线、微软、外置登录验证的支持
 + 支持多线程高速补全Assets、Libraries等游戏资源
-+ 支持自动安装Forge、Fabric、OptiFine加载器
-+ 支持对CurseForge的api的封装
++ 支持自动安装Forge、Fabric、OptiFine,Quilt加载器
++ 支持对CurseForge,Modrinth的api的封装
++ 支持游戏崩溃探测
++ 支持游戏日志解析
 + 支持从[Bmclapi、Mcbbs](https://bmclapidoc.bangbang93.com/)下载源进行文件补全
   + 在此感谢bangbang93提供镜像站服务 如果您支持我们 可以 [赞助Bmclapi](https://afdian.net/@bangbang93)
   
