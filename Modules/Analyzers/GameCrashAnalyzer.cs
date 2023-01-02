@@ -308,7 +308,6 @@ namespace MinecraftLaunch.Modules.Analyzers
         /// </summary>
         private void AddPossibleCauses(CrashReason reason , ICollection<string> strings = null)
         {
-            Trace.WriteLine(reason.ToString());
             if (CrashReason.ContainsKey(reason))
             {
                 if (strings is not null)
@@ -317,10 +316,7 @@ namespace MinecraftLaunch.Modules.Analyzers
                     CrashReason[reason].Distinct();
                 }
             }
-            else
-            {
-                CrashReason.Add(reason, new List<string>());
-            }
+            else CrashReason.Add(reason, new List<string>());               
         }
 
         /// <summary>
@@ -343,10 +339,6 @@ namespace MinecraftLaunch.Modules.Analyzers
         /// </summary>
         public string Log { get; set; }
         /// <summary>
-        /// 崩溃的游戏核心
-        /// </summary>
-        public GameCore GameCore { get; set; }
-        /// <summary>
         /// 导致崩溃的可能原因
         /// </summary>
         public Dictionary<CrashReason, List<string>> CrashReason { get; set; } = new();
@@ -356,8 +348,7 @@ namespace MinecraftLaunch.Modules.Analyzers
     {
         public GameCrashAnalyzer(List<string> log)
         {
-            //GameCore = core;
-            Log = string.Join(' ', log);
+            Log = string.Join(' ', log);  
         }
     }
 }
