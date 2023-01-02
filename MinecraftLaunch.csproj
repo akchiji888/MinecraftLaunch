@@ -4,11 +4,25 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Title>MinecraftLaunch</Title>
+    <Version>1.7.0-preview1</Version>
+    <Authors>Xilu</Authors>
+    <Company>BlessingLife Studio</Company>
+    <Description>下一代全能高效化的 Minecraft 启动核心</Description>
+    <PackageIcon>icon.png</PackageIcon>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Natsurainko.Toolkits" Version="1.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
