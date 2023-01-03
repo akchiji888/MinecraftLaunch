@@ -37,22 +37,24 @@ public class OptiFineInstaller : InstallerBase
 		Action<(float, string)> action2 = action;
 		IProgress<(float, string)> progress2 = new Progress<(float, string)>();
 		((Progress<(float, string)>)progress2).ProgressChanged += ProgressChanged;
-		progress2.Report((0f, "开始下载 OptiFine 安装包"));
-		InvokeStatusChangedEvent("开始下载 OptiFine 安装包", 0f);
-		if (string.IsNullOrEmpty(PackageFile) || !File.Exists(PackageFile))
-		{
-			HttpDownloadResponse downloadResponse = await DownloadOptiFinePackageFromBuildAsync(OptiFineBuild, GameCoreLocator.Root, delegate(float progress1, string message)
-			{
-				progress2.Report((0.15f * progress1, "下载 OptiFine 安装包中 " + message));
-				InvokeStatusChangedEvent("下载 OptiFine 安装包中", 0.15f * progress1);
-			});
-			if (downloadResponse.HttpStatusCode != HttpStatusCode.OK)
-			{
-				throw new HttpRequestException(downloadResponse.HttpStatusCode.ToString());
-			}
-			PackageFile = downloadResponse.FileInfo.FullName;
-		}
-		progress2.Report((0.45f, "开始解析 OptiFine 安装包"));
+
+        #region Download PackageFile
+        progress2.Report((0f, "开始下载 OptiFine 安装包"));
+        if (string.IsNullOrEmpty(PackageFile) || !File.Exists(PackageFile))
+        {
+            var downloadResponse = await DownloadOptiFinePackageFromBuildAsync(this.OptiFineBuild, GameCoreLocator.Root, (progress, message) =>
+            {
+                progress2.Report((0.15f * progress, "下载 OptiFine 安装包中 " + message));
+            });
+
+            if (downloadResponse.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                throw new HttpRequestException(downloadResponse.HttpStatusCode.ToString());
+
+            PackageFile = downloadResponse.FileInfo.FullName;
+        }
+        #endregion
+
+        progress2.Report((0.45f, "开始解析 OptiFine 安装包"));
 		InvokeStatusChangedEvent("开始解析 OptiFine 安装包", 0.45f);
 		using (ZipArchive archive = ZipFile.OpenRead(PackageFile))
 		{

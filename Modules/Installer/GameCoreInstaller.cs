@@ -15,9 +15,9 @@ namespace MinecraftLaunch.Modules.Installer
     {
         public async ValueTask<InstallerResponse> InstallAsync(Action<(float, string)> action)
         {
-            Action<(float, string)> action2 = action;
             IProgress<(float, string)> progress = new Progress<(float, string)>();
             ((Progress<(float, string)>)progress).ProgressChanged += ProgressChanged;
+            void ProgressChanged(object _, (float, string) e) => action(e);
             try
             {
                 progress.Report((0.1f, "正在获取 游戏核心Json"));
@@ -54,10 +54,6 @@ namespace MinecraftLaunch.Modules.Installer
                     GameCore = null,
                     Exception = exception
                 };
-            }
-            void ProgressChanged(object _, (float, string) e)
-            {
-                action2(e);
             }
         }
 

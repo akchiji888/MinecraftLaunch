@@ -42,25 +42,28 @@ public class ResourceInstaller : InstallerBase
 		int output = 0;
 		ActionBlock<IResource> actionBlock = new ActionBlock<IResource>(async delegate(IResource resource)
 		{
-			post++;
-			HttpDownloadRequest request = resource.ToDownloadRequest();
-			if (!request.Directory.Exists)
+			await Task.Run(async() =>
 			{
-				request.Directory.Create();
-			}
-			try
-			{
-				if ((await HttpToolkit.HttpDownloadAsync(request)).HttpStatusCode != HttpStatusCode.OK)
-				{
-					FailedResources.Add(resource);
-				}
-			}
-			catch
-			{
-				FailedResources.Add(resource);
-			}
-			output++;
-			((IProgress<(string, float)>)progress).Report(($"{output}/{post}", (float)output / (float)post));
+                post++;
+                HttpDownloadRequest request = resource.ToDownloadRequest();
+                if (!request.Directory.Exists)
+                {
+                    request.Directory.Create();
+                }
+                try
+                {
+                    if ((await HttpToolkit.HttpDownloadAsync(request)).HttpStatusCode != HttpStatusCode.OK)
+                    {
+                        FailedResources.Add(resource);
+                    }
+                }
+                catch
+                {
+                    FailedResources.Add(resource);
+                }
+                output++;
+                ((IProgress<(string, float)>)progress).Report(($"{output}/{post}", (float)output / (float)post));
+            });
 			//InvokeStatusChangedEvent($"{output}/{post}", (float)output / (float)post);
 		}, new ExecutionDataflowBlockOptions
 		{
