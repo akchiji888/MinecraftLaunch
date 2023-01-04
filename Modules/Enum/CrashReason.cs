@@ -15,6 +15,7 @@ namespace MinecraftLaunch.Modules.Enum
         特定实体导致崩溃,
         材质过大或显卡配置不足,
         光影或资源包导致OpenGL1282错误,
+        无法加载纹理,
 
         //Mod
         Mod配置文件导致游戏崩溃,

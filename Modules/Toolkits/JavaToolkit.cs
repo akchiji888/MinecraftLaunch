@@ -85,15 +85,11 @@ public sealed class JavaToolkit
 			{
 				string pie = obj.Trim(" \"".ToCharArray());
 				if (!obj.EndsWith("\\"))
-				{
-					pie += "\\";
-				}
-				if (File.Exists(obj + "javaw.exe"))
-				{
-					JavaPreList.Add(pie);
-				}
-			}
-			DriveInfo[] drives = DriveInfo.GetDrives();
+                    pie += "\\";
+                if (File.Exists(obj + "javaw.exe"))
+                    JavaPreList.Add(pie);
+            }
+            DriveInfo[] drives = DriveInfo.GetDrives();
 			for (int j = 0; j < drives.Length; j++)
 			{
 				JavaSearchFolder(new DirectoryInfo(drives[j].Name), ref JavaPreList, Source: false);
@@ -115,18 +111,14 @@ public sealed class JavaToolkit
 				JavaWithoutReparse.Add(Pair2);
 			}
 			if (JavaWithoutReparse.Count > 0)
-			{
 				JavaPreList = JavaWithoutReparse;
-			}
 			List<string> JavaWithoutInherit = new List<string>();
 			foreach (string Pair in JavaPreList)
 			{
 				if (!Pair.Contains("javapath_target_"))
-				{
-					JavaWithoutInherit.Add(Pair);
-				}
-			}
-			if (JavaWithoutInherit.Count > 0)
+                    JavaWithoutInherit.Add(Pair);
+            }
+            if (JavaWithoutInherit.Count > 0)
 			{
 				JavaPreList = JavaWithoutInherit;
 			}
@@ -196,7 +188,37 @@ public sealed class JavaToolkit
 				if (!FolderInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
 				{
 					string SearchEntry = GetFolderNameFromPath(FolderInfo.Name).ToLower();
-					if (IsFullSearch || FolderInfo.Parent.Name.ToLower() == "users" || SearchEntry.Contains("java") || SearchEntry.Contains("jdk") || SearchEntry.Contains("env") || SearchEntry.Contains("环境") || SearchEntry.Contains("run") || SearchEntry.Contains("软件") || SearchEntry.Contains("jre") || SearchEntry == "bin" || SearchEntry.Contains("mc") || SearchEntry.Contains("software") || SearchEntry.Contains("cache") || SearchEntry.Contains("temp") || SearchEntry.Contains("corretto") || SearchEntry.Contains("roaming") || SearchEntry.Contains("users") || SearchEntry.Contains("craft") || SearchEntry.Contains("program") || SearchEntry.Contains("世界") || SearchEntry.Contains("net") || SearchEntry.Contains("游戏") || SearchEntry.Contains("oracle") || SearchEntry.Contains("game") || SearchEntry.Contains("file") || SearchEntry.Contains("data") || SearchEntry.Contains("jvm") || SearchEntry.Contains("服务") || SearchEntry.Contains("server") || SearchEntry.Contains("客户") || SearchEntry.Contains("client") || SearchEntry.Contains("整合") || SearchEntry.Contains("应用") || SearchEntry.Contains("运行") || SearchEntry.Contains("前置") || SearchEntry.Contains("mojang") || SearchEntry.Contains("官启") || SearchEntry.Contains("新建文件夹") || SearchEntry.Contains("eclipse") || SearchEntry.Contains("microsoft") || SearchEntry.Contains("hotspot") || SearchEntry.Contains("runtime") || SearchEntry.Contains("x86") || SearchEntry.Contains("x64") || SearchEntry.Contains("forge") || SearchEntry.Contains("原版") || SearchEntry.Contains("optifine") || SearchEntry.Contains("官方") || SearchEntry.Contains("启动") || SearchEntry.Contains("hmcl") || SearchEntry.Contains("mod") || SearchEntry.Contains("高清") || SearchEntry.Contains("download") || SearchEntry.Contains("launch") || SearchEntry.Contains("程序") || SearchEntry.Contains("path") || SearchEntry.Contains("国服") || SearchEntry.Contains("网易") || SearchEntry.Contains("ext") || SearchEntry.Contains("netease") || SearchEntry.Contains("1.") || SearchEntry.Contains("启动"))
+					if (IsFullSearch || FolderInfo.Parent.Name.ToLower() == "users" ||
+						SearchEntry.Contains("java") || SearchEntry.Contains("jdk") ||
+						SearchEntry.Contains("env") || SearchEntry.Contains("环境") ||
+						SearchEntry.Contains("run") || SearchEntry.Contains("软件") ||
+						SearchEntry.Contains("jre") || SearchEntry == "bin" ||
+						SearchEntry.Contains("mc") || SearchEntry.Contains("software") ||
+						SearchEntry.Contains("cache") || SearchEntry.Contains("temp") ||
+						SearchEntry.Contains("corretto") || SearchEntry.Contains("roaming") ||
+						SearchEntry.Contains("users") || SearchEntry.Contains("craft") ||
+						SearchEntry.Contains("program") || SearchEntry.Contains("世界") ||
+						SearchEntry.Contains("net") || SearchEntry.Contains("游戏") ||
+						SearchEntry.Contains("oracle") || SearchEntry.Contains("game") ||
+						SearchEntry.Contains("file") || SearchEntry.Contains("data") ||
+						SearchEntry.Contains("jvm") || SearchEntry.Contains("服务") ||
+						SearchEntry.Contains("server") || SearchEntry.Contains("客户") ||
+						SearchEntry.Contains("client") || SearchEntry.Contains("整合") || 
+						SearchEntry.Contains("应用") || SearchEntry.Contains("运行") ||
+						SearchEntry.Contains("前置") || SearchEntry.Contains("mojang") ||
+						SearchEntry.Contains("官启") || SearchEntry.Contains("新建文件夹") || 
+						SearchEntry.Contains("eclipse") || SearchEntry.Contains("microsoft") || 
+						SearchEntry.Contains("hotspot") || SearchEntry.Contains("runtime") ||
+						SearchEntry.Contains("x86") || SearchEntry.Contains("x64") || 
+						SearchEntry.Contains("forge") || SearchEntry.Contains("原版") ||
+						SearchEntry.Contains("optifine") || SearchEntry.Contains("官方") ||
+						SearchEntry.Contains("启动") || SearchEntry.Contains("hmcl") || 
+						SearchEntry.Contains("mod") || SearchEntry.Contains("高清") ||
+						SearchEntry.Contains("download") || SearchEntry.Contains("launch") ||
+						SearchEntry.Contains("程序") || SearchEntry.Contains("path") ||
+						SearchEntry.Contains("国服") || SearchEntry.Contains("网易") ||
+						SearchEntry.Contains("ext") || SearchEntry.Contains("netease") ||
+						SearchEntry.Contains("1.") || SearchEntry.Contains("启动"))
 					{
 						JavaSearchFolder(FolderInfo, ref Results, Source);
 					}
