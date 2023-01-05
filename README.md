@@ -8,6 +8,8 @@
 
 下一代全能模块化的 Minecraft 启动核心
 ---------------------------------------------------------
+![Alt](https://repobeats.axiom.co/api/embed/10d2aeb35e3f44ee8981feccc2540ce47cb75ea5.svg "Repobeats analytics image")
+
 
 ### 简介
 一个由C#编写的跨平台模块化 Minecraft 启动核心
