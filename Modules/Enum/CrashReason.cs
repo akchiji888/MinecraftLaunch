@@ -40,13 +40,14 @@ namespace MinecraftLaunch.Modules.Enum
         崩溃日志堆栈分析发现关键字,
         崩溃日志堆栈分析发现Mod名称,
         MC日志堆栈分析发现关键字,
-
+        
         //Jvm
         内存不足,
         使用JDK,
         显卡不支持OpenGL,
         使用OpenJ9,
         Java版本过高,
+        不支持的Java类版本错误,
         使用32位Java导致JVM无法分配足够多的内存,
 
         //Player

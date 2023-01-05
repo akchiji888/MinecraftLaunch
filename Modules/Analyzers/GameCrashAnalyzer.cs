@@ -88,6 +88,9 @@ namespace MinecraftLaunch.Modules.Analyzers
 
             if (Log.Contains("Couldn't load texture"))
                 AddPossibleCauses(Enum.CrashReason.无法加载纹理);
+
+            if (Log.Contains("UnsupportedClassVersionError"))
+                AddPossibleCauses(Enum.CrashReason.不支持的Java类版本错误);
         }
 
         /// <summary>
