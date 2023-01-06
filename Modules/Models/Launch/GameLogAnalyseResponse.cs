@@ -17,5 +17,7 @@ namespace MinecraftLaunch.Modules.Models.Launch
         public string Time { get; set; }
 
         public string Source { get; set; }
+
+        public string Log { get; set; }
     }
 }

@@ -86,7 +86,7 @@ namespace MinecraftLaunch.Modules.Analyzers
             if (Log.Contains("\tEntity's Exact location: "))
                 AddPossibleCauses(Enum.CrashReason.特定实体导致崩溃);
 
-            if (Log.Contains("Couldn't load texture"))
+            if (Log.Contains("Couldn't load texture") || Log.Contains("Could not load image"))
                 AddPossibleCauses(Enum.CrashReason.无法加载纹理);
 
             if (Log.Contains("UnsupportedClassVersionError"))

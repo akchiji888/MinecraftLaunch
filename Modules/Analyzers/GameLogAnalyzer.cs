@@ -21,6 +21,7 @@ namespace MinecraftLaunch.Modules.Analyzers
 
             return new()
             {
+                Log = GetLog(log),
                 Source = GetSource(log),
                 Time = Regex.IsMatch(log, "(20|21|22|23|[0-1]\\d):[0-5]\\d:[0-5]\\d", RegexOptions.Compiled) ? GetLogTime(log) : DateTime.Now.ToString(),
                 LogType = GetLogType(log) switch
@@ -35,6 +36,13 @@ namespace MinecraftLaunch.Modules.Analyzers
                     _ => GameLogType.Unknown
                 } ,
             };
+        }
+
+        public static string GetLog(string log)
+        {
+            var res = GetTotalPrefix(log);
+            var s = log.Split(res);
+            return (s.Length >= 2 ? s[1] : log).Trim();
         }
 
         /// <summary>
@@ -56,7 +64,7 @@ namespace MinecraftLaunch.Modules.Analyzers
         }
 
         /// <summary>
-        /// 获取源日志
+        /// 获取日志源
         /// </summary>
         /// <param name="log"></param>
         /// <returns></returns>
