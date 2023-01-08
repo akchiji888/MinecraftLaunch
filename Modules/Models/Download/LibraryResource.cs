@@ -58,13 +58,6 @@ public class LibraryResource : IResource
 
 	public HttpDownloadRequest ToDownloadRequest()
 	{
-		//IL_00b2: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00b7: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00c8: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00d9: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00e5: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00f6: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00fe: Expected O, but got Unknown
 		string root = APIManager.Current.Libraries;
 		foreach (string item in FormatName(Name))
 		{
