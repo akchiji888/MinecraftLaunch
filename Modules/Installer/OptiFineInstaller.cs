@@ -55,7 +55,6 @@ public class OptiFineInstaller : InstallerBase
         #endregion
 
         progress2.Report((0.45f, "开始解析 OptiFine 安装包"));
-		InvokeStatusChangedEvent("开始解析 OptiFine 安装包", 0.45f);
 		using (ZipArchive archive = ZipFile.OpenRead(PackageFile))
 		{
 			string launchwrapper = "1.12";
@@ -64,18 +63,17 @@ public class OptiFineInstaller : InstallerBase
 				launchwrapper = ZipExtension.GetString(archive.GetEntry("launchwrapper-of.txt"));
 			}
 			progress2.Report((0.55f, "开始检查继承的核心"));
-			InvokeStatusChangedEvent("开始检查继承的核心", 0.55f);
 			if (GameCoreLocator.GetGameCore(OptiFineBuild.McVersion) == null)
 			{
 				await new GameCoreInstaller(GameCoreLocator, OptiFineBuild.McVersion).InstallAsync(delegate((float, string) e)
 				{
 					progress2.Report((0.45f + 0.15000004f * e.Item1, "正在下载继承的游戏核心：" + e.Item2));
-					InvokeStatusChangedEvent("正在下载继承的游戏核心：" + e.Item2, 0.45f + 0.15000004f * e.Item1);
 				});
 			}
+
 			OptiFineGameCoreJsonEntity entity = new OptiFineGameCoreJsonEntity
 			{
-				Id = (string.IsNullOrEmpty(CustomId) ? $"{OptiFineBuild.McVersion}-OptiFine-{OptiFineBuild.Type}_{OptiFineBuild.Patch}" : CustomId),
+				Id = (string.IsNullOrEmpty(CustomId) ? $"{OptiFineBuild.McVersion}-OptiFine_{OptiFineBuild.Type}_{OptiFineBuild.Patch}" : CustomId),
 				InheritsFrom = OptiFineBuild.McVersion,
 				Time = DateTime.Now.ToString("O"),
 				ReleaseTime = DateTime.Now.ToString("O"),
@@ -102,9 +100,7 @@ public class OptiFineInstaller : InstallerBase
 				}
 			};
 			progress2.Report((0.7f, "开始写入文件"));
-			InvokeStatusChangedEvent("开始写入文件", 0.7f);
 			progress2.Report((0.75f, "开始分析是否安装模组加载器"));
-			InvokeStatusChangedEvent("开始分析是否安装模组加载器", 0.75f);
 			string id = (string.IsNullOrEmpty(CustomId) ? $"{OptiFineBuild.McVersion}-OptiFine-{OptiFineBuild.Type}_{OptiFineBuild.Patch}" : CustomId);
 			bool flag;
 			try
