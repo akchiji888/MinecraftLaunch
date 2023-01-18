@@ -88,8 +88,7 @@ public class GameCoreToolkit
 						entities.Add(entity);
 					}
 					catch
-					{
-					}
+					{}					
 				}
 			}
 		}
