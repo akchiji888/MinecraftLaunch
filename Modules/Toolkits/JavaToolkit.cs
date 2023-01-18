@@ -76,73 +76,94 @@ public sealed class JavaToolkit
 	[SupportedOSPlatform("windows")]
 	public static IEnumerable<JavaInfo> GetJavas()
 	{
-		try
-		{
-			string? environmentVariable = Environment.GetEnvironmentVariable("Path");
-			List<string> JavaPreList = new List<string>();
-			string[] array = Strings.Split(environmentVariable.Replace("\\\\", "\\").Replace("/", "\\"), ";");
-			foreach (string obj in array)
-			{
-				string pie = obj.Trim(" \"".ToCharArray());
-				if (!obj.EndsWith("\\"))
+        List<JavaInfo> ret = new();
+        try
+        {
+            string environmentVariable = Environment.GetEnvironmentVariable("Path");
+            List<string> JavaPreList = new List<string>();
+            string[] array = Strings.Split(environmentVariable.Replace("\\\\", "\\").Replace("/", "\\"), ";");
+            string[] array2 = array;
+            foreach (string obj in array2)
+            {
+                string pie = obj.Trim(" \"".ToCharArray());
+                if (!obj.EndsWith("\\"))
+                {
                     pie += "\\";
-                if (File.Exists(obj + "javaw.exe"))
-                    JavaPreList.Add(pie);
-            }
-            DriveInfo[] drives = DriveInfo.GetDrives();
-			for (int j = 0; j < drives.Length; j++)
-			{
-				JavaSearchFolder(new DirectoryInfo(drives[j].Name), ref JavaPreList, Source: false);
-			}
-			JavaSearchFolder(new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), ref JavaPreList, Source: false);
-			JavaSearchFolder(new DirectoryInfo(AppDomain.CurrentDomain.SetupInformation.ApplicationBase), ref JavaPreList, Source: false, IsFullSearch: true);
-			List<string> JavaWithoutReparse = new List<string>();
-			foreach (string Pair2 in JavaPreList)
-			{
-				FileSystemInfo Info = new FileInfo(Pair2.Replace("\\\\", "\\").Replace("/", "\\") + "javaw.exe");
-				do
-				{
-					if (!Info.Attributes.HasFlag(FileAttributes.ReparsePoint))
-					{
-						Info = ((Info is FileInfo) ? ((FileInfo)Info).Directory : ((DirectoryInfo)Info).Parent);
-					}
-				}
-				while (Info != null);
-				JavaWithoutReparse.Add(Pair2);
-			}
-			if (JavaWithoutReparse.Count > 0)
-				JavaPreList = JavaWithoutReparse;
-			List<string> JavaWithoutInherit = new List<string>();
-			foreach (string Pair in JavaPreList)
-			{
-				if (!Pair.Contains("javapath_target_"))
-                    JavaWithoutInherit.Add(Pair);
-            }
-            if (JavaWithoutInherit.Count > 0)
-			{
-				JavaPreList = JavaWithoutInherit;
-			}
-			JavaPreList.Sort((string x, string s) => x.CompareTo(s));
-			foreach (string i in JavaPreList)
-			{
-				JavaInfo res = GetJavaInfo(i);
-				yield return new JavaInfo
-				{
-					Is64Bit = res.Is64Bit,
-					JavaDirectoryPath = i,
-					JavaSlugVersion = res.JavaSlugVersion,
-					JavaVersion = res.JavaVersion,
-					JavaPath = Path.Combine(i, "javaw.exe")
-				};
-			}
-		}
-		finally
-		{
-			GC.Collect();
-		}
-	}
+                }
 
-	public static JavaInfo GetCorrectOfGameJava(IEnumerable<JavaInfo> Javas, GameCore gameCore)
+                if (File.Exists(obj + "javaw.exe"))
+                {
+                    JavaPreList.Add(pie);
+                }
+            }
+
+            DriveInfo[] drives = DriveInfo.GetDrives();
+            for (int j = 0; j < drives.Length; j++)
+            {
+                JavaSearchFolder(new DirectoryInfo(drives[j].Name), ref JavaPreList, Source: false);
+            }
+
+            JavaSearchFolder(new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), ref JavaPreList, Source: false);
+            JavaSearchFolder(new DirectoryInfo(AppDomain.CurrentDomain.SetupInformation.ApplicationBase), ref JavaPreList, Source: false, IsFullSearch: true);
+            List<string> JavaWithoutReparse = new List<string>();
+            foreach (string Pair2 in JavaPreList)
+            {
+                FileSystemInfo Info = new FileInfo(Pair2.Replace("\\\\", "\\").Replace("/", "\\") + "javaw.exe");
+                do
+                {
+                    if (!Info.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                    {
+                        Info = ((Info is FileInfo) ? ((FileInfo)Info).Directory : ((DirectoryInfo)Info).Parent);
+                    }
+                }
+                while (Info != null);
+                JavaWithoutReparse.Add(Pair2);
+            }
+
+            if (JavaWithoutReparse.Count > 0)
+            {
+                JavaPreList = JavaWithoutReparse;
+            }
+
+            List<string> JavaWithoutInherit = new List<string>();
+            foreach (string Pair in JavaPreList)
+            {
+                if (!Pair.Contains("javapath_target_"))
+                {
+                    JavaWithoutInherit.Add(Pair);
+                }
+            }
+
+            if (JavaWithoutInherit.Count > 0)
+            {
+                JavaPreList = JavaWithoutInherit;
+            }
+
+            JavaPreList.Sort((string x, string s) => x.CompareTo(s));
+            foreach (string i in JavaPreList)
+            {
+                JavaInfo? res = GetJavaInfo(i);
+                if (res != null)
+                {
+                    ret.Add(new JavaInfo
+                    {
+                        Is64Bit = res.Is64Bit,
+                        JavaDirectoryPath = i,
+                        JavaSlugVersion = res.JavaSlugVersion,
+                        JavaVersion = res.JavaVersion,
+                        JavaPath = Path.Combine(i, "javaw.exe")
+                    });
+                }
+            }
+        }
+        finally
+        {
+            GC.Collect();
+        }
+        return ret;
+    }
+
+    public static JavaInfo GetCorrectOfGameJava(IEnumerable<JavaInfo> Javas, GameCore gameCore)
 	{
 		JavaInfo res = null;
 		foreach (JavaInfo j in Javas)
@@ -240,9 +261,7 @@ public sealed class JavaToolkit
 			return FolderPath.Substring(0, 1);
 		}
 		if (FolderPath.EndsWith("\\") || FolderPath.EndsWith("/"))
-		{
 			FolderPath = Strings.Left(FolderPath, FolderPath.Length - 1);
-		}
 		return GetFileNameFromPath(FolderPath);
 	}
 
