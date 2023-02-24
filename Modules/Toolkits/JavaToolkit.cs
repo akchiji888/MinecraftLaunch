@@ -11,27 +11,28 @@ namespace MinecraftLaunch.Modules.Toolkits;
 
 public sealed class JavaToolkit
 {
-	[SupportedOSPlatform("windows")]
-	public static JavaInfo GetJavaInfo(string javaDirectorypath)
+	public static JavaInfo GetJavaInfo(string javapath)
 	{
+	    FileInfo info = new(javapath);
 		try
 		{
 			int? ires = null;
 			string tempinfo = null;
 			string pattern = "java version \"\\s*(?<version>\\S+)\\s*\"";
-			ProcessStartInfo Info = new ProcessStartInfo
-			{
-				Arguments = "-version",
-				FileName = Path.Combine(javaDirectorypath, "java.exe"),
-				UseShellExecute = false,
-				CreateNoWindow = true,
-				RedirectStandardError = true,
-				RedirectStandardOutput = true
-			};
+
 			using Process Program = new Process
 			{
-				StartInfo = Info
-			};
+				StartInfo = new()
+				{
+                    Arguments = "-version",
+                    FileName = javapath.EndsWith(".exe") ? Path.Combine(info.Directory!.FullName, "java.exe") : info.FullName,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true
+                }
+            };
+
 			Program.Start();
 			Program.WaitForExit(8000);
 			StreamReader res = Program.StandardError;
@@ -40,31 +41,27 @@ public sealed class JavaToolkit
 			{
 				string temp = res.ReadLine();
 				if (temp.Contains("java version"))
-				{
-					tempinfo = new Regex(pattern).Match(temp).Groups["version"].Value;
-				}
-				else if (temp.Contains("openjdk version"))
+                    tempinfo = new Regex(pattern).Match(temp).Groups["version"].Value;
+                else if (temp.Contains("openjdk version"))
 				{
 					pattern = pattern.Replace("java", "openjdk");
 					tempinfo = new Regex(pattern).Match(temp).Groups["version"].Value;
 				}
 				else if (temp.Contains("64-Bit"))
-				{
-					end = true;
-				}
-			}
-			string[] sres = tempinfo.Split(".");
+                    end = true;
+            }
+
+            string[] sres = tempinfo.Split(".");
 			if (sres.Length != 0)
-			{
-				ires = ((int.Parse(sres[0]) == 1) ? new int?(int.Parse(sres[1])) : new int?(int.Parse(sres[0])));
-			}
-			return new JavaInfo
+                ires = ((int.Parse(sres[0]) == 1) ? new int?(int.Parse(sres[1])) : new int?(int.Parse(sres[0])));
+
+            return new JavaInfo
 			{
 				Is64Bit = end,
-				JavaDirectoryPath = (javaDirectorypath.EndsWith('\\') ? javaDirectorypath : (javaDirectorypath + "\\")),
+				JavaDirectoryPath = info.Directory!.FullName,
 				JavaSlugVersion = Convert.ToInt32(ires),
 				JavaVersion = tempinfo,
-				JavaPath = Path.Combine(javaDirectorypath, "javaw.exe")
+				JavaPath = info.FullName,
 			};
 		}
 		catch (Exception)
@@ -113,7 +110,7 @@ public sealed class JavaToolkit
                 {
                     if (!Info.Attributes.HasFlag(FileAttributes.ReparsePoint))
                     {
-                        Info = ((Info is FileInfo) ? ((FileInfo)Info).Directory : ((DirectoryInfo)Info).Parent);
+                        Info = ((Info is FileInfo) ? ((FileInfo)Info).Directory : ((DirectoryInfo)Info).Parent)!;
                     }
                 }
                 while (Info != null);
@@ -128,8 +125,7 @@ public sealed class JavaToolkit
             List<string> JavaWithoutInherit = new List<string>();
             foreach (string Pair in JavaPreList)
             {
-                if (!Pair.Contains("javapath_target_"))
-                {
+                if (!Pair.Contains("javapath_target_")) {               
                     JavaWithoutInherit.Add(Pair);
                 }
             }
@@ -140,7 +136,7 @@ public sealed class JavaToolkit
             }
 
             JavaPreList.Sort((string x, string s) => x.CompareTo(s));
-            foreach (string i in JavaPreList)
+            foreach (string i in JavaPreList.AsParallel())
             {
                 JavaInfo? res = GetJavaInfo(i);
                 if (res != null)
@@ -160,6 +156,7 @@ public sealed class JavaToolkit
         {
             GC.Collect();
         }
+
         return ret;
     }
 

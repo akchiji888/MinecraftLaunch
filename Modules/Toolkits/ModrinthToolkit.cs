@@ -12,11 +12,10 @@ namespace MinecraftLaunch.Modules.Toolkits;
 
 public class ModrinthToolkit
 {
-	private const string BaseUrl = "https://api.modrinth.com/v2";
-
 	public static async ValueTask<ModrinthSearchResponse> GetFeaturedModpacksAsync()
 	{
-		return JsonConvert.DeserializeObject<ModrinthSearchResponse>(await (await HttpWrapper.HttpGetAsync("https://api.modrinth.com/v2/search", (Tuple<string, string>)null, HttpCompletionOption.ResponseContentRead)).Content.ReadAsStringAsync());
+		var res = await HttpWrapper.HttpGetAsync("https://api.modrinth.com/v2/search");
+        return JsonConvert.DeserializeObject<ModrinthSearchResponse>(await res.Content.ReadAsStringAsync())!;
 	}
 
 	public static async ValueTask<ModrinthSearchResponse> SearchAsync(string searchFilter, string Category = "", string Index = "relevance", string ProjectType = "mod")

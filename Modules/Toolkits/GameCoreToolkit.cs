@@ -235,4 +235,8 @@ public class GameCoreToolkit
 	{
 		Root = root;
 	}
+
+	public static implicit operator GameCoreToolkit(string path) => new GameCoreToolkit(path);
+
+    public static implicit operator GameCoreToolkit(DirectoryInfo path) => new GameCoreToolkit(path);
 }

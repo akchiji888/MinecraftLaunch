@@ -63,7 +63,7 @@ public class LibraryResource : IResource
 		{
 			root = UrlExtension.Combine(new string[2] { root, item });
 		}
-		if (!string.IsNullOrEmpty(Url))
+		if (!string.IsNullOrEmpty(Url) && (!Url.Contains("fabricmc") || !Url.Contains("quiltmc") || !Url.Contains("minecraftforge")))
 		{
 			root = (APIManager.Current.Host.Equals(APIManager.Mojang.Host) ? Url : Url.Replace(APIManager.Mojang.Libraries, APIManager.Current.Libraries).Replace(APIManager.ForgeLibraryUrlReplace).Replace(APIManager.FabricLibraryUrlReplace));
 		}

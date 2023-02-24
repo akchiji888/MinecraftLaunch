@@ -132,7 +132,7 @@ public static class ExtendToolkit
 
 	public static string ToDownloadLink(this OpenJdkType open, JdkDownloadSource jdkDownloadSource)
 	{
-		foreach (KeyValuePair<string, KeyValuePair<string, string>[]> i in JavaInstaller.OpenJdkDownloadSources)
+		foreach (KeyValuePair<string, KeyValuePair<string, string>[]> i in JavaInstaller.OpenJdkDownloadSourcesForWindows)
 		{
 			if (i.Key == "OpenJDK 8" && open == OpenJdkType.OpenJdk8)
 			{
