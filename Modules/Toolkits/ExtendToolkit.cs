@@ -215,4 +215,12 @@ public static class ExtendToolkit
 		}
 		throw new WebException("下载失败");
 	}
+
+	public static bool IsDirectory(this string path) => Directory.Exists(path);
+
+	public static bool IsDirectory(this DirectoryInfo path) => path!.Exists;
+
+    public static bool IsFile(this string path) => File.Exists(path);
+
+    public static bool IsFile(this FileInfo path) => path!.Exists;
 }

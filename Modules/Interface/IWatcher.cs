@@ -13,6 +13,6 @@ namespace MinecraftLaunch.Modules.Interface
         /// <summary>
         /// 开始监视
         /// </summary>
-        void StartWatch();
+       void StartWatch();
     }
 }

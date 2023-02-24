@@ -13,6 +13,8 @@ namespace MinecraftLaunch.Modules.Watcher
     /// </summary>
     public class GameCoresWatcher : IWatcher
     {
+        public event EventHandler<GameCoresChangedArgs>? GameCoresChanged;
+
         public GameCoresWatcher(GameCoreToolkit toolkit) {       
             Toolkit = toolkit;
         }
@@ -20,7 +22,37 @@ namespace MinecraftLaunch.Modules.Watcher
         public GameCoreToolkit Toolkit { get; private set; }
 
         public void StartWatch() {       
-            //System.IO.di
+            FileSystemWatcher watcher = new(Toolkit.Root.FullName);
+            watcher.EnableRaisingEvents = true;
+
+            watcher.Changed += (_, x) => {
+                GameCoresChanged?.Invoke(this, new(WatcherChangeTypes.Changed, x.FullPath.IsDirectory() ? x.FullPath : string.Empty));
+            };
+
+            watcher.Created += (_, x) => {
+                GameCoresChanged?.Invoke(this, new(WatcherChangeTypes.Created, x.FullPath.IsDirectory() ? x.FullPath : string.Empty));
+            };
+
+            watcher.Deleted += (_, x) => {
+                GameCoresChanged?.Invoke(this, new(WatcherChangeTypes.Deleted, x.FullPath.IsDirectory() ? x.FullPath : string.Empty));
+            };
+
+            watcher.Renamed += (_, x) => {
+                GameCoresChanged?.Invoke(this, new(WatcherChangeTypes.Renamed, x.FullPath.IsDirectory() ? x.FullPath : string.Empty));
+            };
         }
+    }
+
+    public class GameCoresChangedArgs
+    {
+        public GameCoresChangedArgs(WatcherChangeTypes types,string id)
+        {
+            ChangeType= types;
+            GameCoreId= id;
+        }
+
+        public WatcherChangeTypes ChangeType { get; set; }
+
+        public string GameCoreId { get; set; }
     }
 }
