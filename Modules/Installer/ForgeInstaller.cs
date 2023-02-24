@@ -47,19 +47,15 @@ namespace MinecraftLaunch.Modules.Installer
             return libraries;
         }
 
-        public async ValueTask<InstallerResponse> InstallAsync(Action<(float, string)> action)
+        public async ValueTask<InstallerResponse> InstallAsync()
         {
-            IProgress<(float, string)> progress2 = new Progress<(float, string)>();
-            ((Progress<(float, string)>)progress2).ProgressChanged += ProgressChanged;
-            void ProgressChanged(object _, (float, string) e) => action(e);
-
             #region Download Package
-            progress2.Report((0f, "开始下载 Forge 安装包"));
+            InvokeStatusChangedEvent(0f, "开始下载 Forge 安装包");
             if (string.IsNullOrEmpty(PackageFile) || !File.Exists(PackageFile))
             {
                 var downloadResponse = await DownForgeOfBuildAsync(this.ForgeBuild.Build, GameCoreLocator.Root, (progress, message) =>
                 {
-                    progress2.Report((0.1f * progress, "下载 Forge 安装包中"));
+                InvokeStatusChangedEvent(0.1f * progress, "下载 Forge 安装包中");
                 });
 
                 if (downloadResponse.HttpStatusCode != System.Net.HttpStatusCode.OK)
@@ -71,7 +67,7 @@ namespace MinecraftLaunch.Modules.Installer
             #endregion
 
             #region Parse Package
-            progress2.Report((0.15f, "开始解析 Forge 安装包"));
+            InvokeStatusChangedEvent(0.15f, "开始解析 Forge 安装包");
             using ZipArchive archive = ZipFile.OpenRead(PackageFile);
             JObject installProfile = JObject.Parse(ZipExtension.GetString(archive.GetEntry("install_profile.json")));
             GameCoreJsonEntity entity = GetGameCoreJsonEntity(archive, installProfile);
@@ -96,9 +92,9 @@ namespace MinecraftLaunch.Modules.Installer
             #region Download Libraries
             try
             {
-                progress2.Report((0.15f, "开始下载 Forge 依赖文件"));
+                InvokeStatusChangedEvent(0.15f, "开始下载 Forge 依赖文件");
                 var downloader = new MultithreadedDownloader<LibraryResource>(x => x.ToDownloadRequest(), downloadLibraries.ToList());
-                downloader.ProgressChanged += (object sender, (float, string) e) => progress2.Report((0.15f + 0.45f * e.Item1, "下载 Forge 依赖文件中：" + e.Item2));
+                downloader.ProgressChanged += (object sender, (float, string) e) => InvokeStatusChangedEvent(0.15f + 0.45f * e.Item1, "下载 Forge 依赖文件中：" + e.Item2);
 
                 if (APIManager.Current.Host.Equals(APIManager.Mojang.Host))
                 {
@@ -114,7 +110,7 @@ namespace MinecraftLaunch.Modules.Installer
             #endregion
 
             #region Write Files
-            progress2.Report((0.7f, "开始写入文件"));
+            InvokeStatusChangedEvent(0.7f, "开始写入文件");
             string forgeFolderId = $"{ForgeBuild.McVersion}-{ForgeBuild.ForgeVersion}";
             string forgeLibrariesFolder = Path.Combine(GameCoreLocator.Root.FullName, "libraries", "net", "minecraftforge", "forge", forgeFolderId);
 
@@ -126,7 +122,7 @@ namespace MinecraftLaunch.Modules.Installer
                     Name = installProfile["install"]["path"].ToString()
                 };
 
-                archive.GetEntry(installProfile["install"]["filePath"].ToString()).ExtractTo(lib.ToFileInfo().FullName);
+                archive.GetEntry(installProfile["install"]!["filePath"]!.ToString()).ExtractTo(lib.ToFileInfo().FullName);
             }
 
             if (archive.GetEntry("maven/") != null)
@@ -137,15 +133,14 @@ namespace MinecraftLaunch.Modules.Installer
                     .ExtractTo(Path.Combine(forgeLibrariesFolder, $"forge-{forgeFolderId}-universal.jar"));
             }
 
-            if (dataDictionary.Any())
-            {
+            if (dataDictionary!.Any()) {           
                 archive.GetEntry("data/client.lzma").ExtractTo(Path.Combine(forgeLibrariesFolder, $"forge-{forgeFolderId}-clientdata.lzma"));
                 archive.GetEntry("data/server.lzma").ExtractTo(Path.Combine(forgeLibrariesFolder, $"forge-{forgeFolderId}-serverdata.lzma"));
             }
 
             var versionJsonFile = new FileInfo(Path.Combine(GameCoreLocator.Root.FullName, "versions", entity.Id, $"{entity.Id}.json"));
 
-            if (!versionJsonFile.Directory.Exists)
+            if (!versionJsonFile.Directory!.Exists)
                 versionJsonFile.Directory.Create();
 
             File.WriteAllText(versionJsonFile.FullName, entity.ToJson());
@@ -153,24 +148,26 @@ namespace MinecraftLaunch.Modules.Installer
             #endregion
 
             #region Check Inherited Core
-            progress2.Report((0.7f, "开始检查继承的核心"));
+            InvokeStatusChangedEvent(0.7f, "开始检查继承的核心");
             if (GameCoreLocator.GetGameCore(ForgeBuild.McVersion) == null)
             {
-                await new GameCoreInstaller(GameCoreLocator, ForgeBuild.McVersion).InstallAsync(delegate ((float, string) e)
-                {
-                    progress2.Report((0.7f + (0.85f - 0.7f) * e.Item1, "正在下载继承的游戏核心：" + e.Item2));
-                });
+                var installer = new GameCoreInstaller(GameCoreLocator, ForgeBuild.McVersion);
+                installer.ProgressChanged += (_, e) => {
+                    InvokeStatusChangedEvent(0.7f + (0.85f - 0.7f) * e.Progress, "正在下载继承的游戏核心：" + e.ProgressDescription);
+                };
+
+                await installer.InstallAsync();
             }
             #endregion
 
             #region LegacyForgeInstaller Exit
             if (installProfile.ContainsKey("versionInfo"))
             {
-                progress2.Report((1f, "安装完成"));
+                InvokeStatusChangedEvent(1f, "安装完成");
                 return new InstallerResponse
                 {
                     Success = true,
-                    Exception = null,
+                    Exception = null!,
                     GameCore = GameCoreLocator.GetGameCore(entity.Id)
                 };
             }
@@ -178,10 +175,10 @@ namespace MinecraftLaunch.Modules.Installer
             #endregion
 
             #region Parser Processor
-            progress2.Report((0.85f, "开始分析安装处理器"));
+            InvokeStatusChangedEvent(0.85f, "开始分析安装处理器");
             try
             {
-                dataDictionary["BINPATCH"]["client"] = $"[net.minecraftforge:forge:{forgeFolderId}:clientdata@lzma]";
+                dataDictionary!["BINPATCH"]["client"] = $"[net.minecraftforge:forge:{forgeFolderId}:clientdata@lzma]";
                 dataDictionary["BINPATCH"]["server"] = $"[net.minecraftforge:forge:{forgeFolderId}:serverdata@lzma]";
             }
             catch (Exception) { }
@@ -196,9 +193,9 @@ namespace MinecraftLaunch.Modules.Installer
                 { "{LIBRARY_DIR}", Path.Combine(this.GameCoreLocator.Root.FullName, "libraries") }
             };
 
-            var replaceProcessorArgs = dataDictionary.ToDictionary(x => $"{{{x.Key}}}", x =>
+            var replaceProcessorArgs = dataDictionary!.ToDictionary(x => $"{{{x.Key}}}", x =>
             {
-                string value = x.Value["client"].ToString();
+                string value = x.Value["client"]!.ToString();
 
                 if (value.StartsWith("[") && value.EndsWith("]"))
                     return CombineLibraryName(value);
@@ -206,7 +203,7 @@ namespace MinecraftLaunch.Modules.Installer
                 return value;
             });
 
-            var processors = installProfile["processors"].ToObject<IEnumerable<ForgeInstallProcessorEntity>>()
+            var processors = installProfile["processors"].ToObject<IEnumerable<ForgeInstallProcessorEntity>>()!
                 .Where(x =>
                 {
                     if (!x.Sides.Any())
@@ -264,7 +261,7 @@ namespace MinecraftLaunch.Modules.Installer
                 var outputs = new List<string>();
                 var errorOutputs = new List<string>();
 
-                process.OutputDataReceived += (_, args) =>
+                process!.OutputDataReceived += (_, args) =>
                 {
                     if (!string.IsNullOrEmpty(args.Data))
                         outputs.Add(args.Data);
@@ -284,15 +281,15 @@ namespace MinecraftLaunch.Modules.Installer
                 process.WaitForExit();
                 processes.Add(outputs, errorOutputs);
 
-                progress2.Report((0.85f + 0.15f * ((float)processors.IndexOf(forgeInstallProcessor) / (float)processors.Count), $"运行安装程序处理器中：{processors.IndexOf(forgeInstallProcessor)}/{processors.Count}"));
+                InvokeStatusChangedEvent(0.85f + 0.15f * ((float)processors.IndexOf(forgeInstallProcessor) / (float)processors.Count), $"运行安装程序处理器中：{processors.IndexOf(forgeInstallProcessor)}/{processors.Count}");
             }
             #endregion
 
-            progress2.Report((1f, "安装完成"));
+            InvokeStatusChangedEvent(1f, "安装完成");
             return new InstallerResponse
             {
                 Success = true,
-                Exception = null,
+                Exception = null!,
                 GameCore = GameCoreLocator.GetGameCore(entity.Id)
             };
         }
@@ -343,8 +340,6 @@ namespace MinecraftLaunch.Modules.Installer
 
     partial class ForgeInstaller
     {
-        public ForgeInstaller() { }
-
         public ForgeInstaller(GameCoreToolkit coreLocator, ForgeInstallEntity build, string javaPath, string customId = null, string packageFile = null)
         {
             ForgeBuild = build;

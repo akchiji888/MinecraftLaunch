@@ -18,14 +18,10 @@ namespace MinecraftLaunch.Modules.Installer
 {
     public partial class FabricInstaller : InstallerBase
     {
-        public async ValueTask<InstallerResponse> InstallAsync(Action<(float, string)> action)
+        public async ValueTask<InstallerResponse> InstallAsync()
         {
-            IProgress<(float, string)> progress = new Progress<(float, string)>();
-            ((Progress<(float, string)>)progress).ProgressChanged += ProgressChanged;
-            void ProgressChanged(object _, (float, string) e) => action(e);
-
             #region Parse Build
-            progress.Report((0.25f, "开始分析生成"));
+            InvokeStatusChangedEvent(0.25f, "开始分析生成");
             var libraries = FabricBuild.LauncherMeta.Libraries["common"];
 
             if (FabricBuild.LauncherMeta.Libraries["common"] != null)
@@ -52,29 +48,31 @@ namespace MinecraftLaunch.Modules.Installer
             #endregion
 
             #region Download Libraries
-            progress.Report((0.45f, "开始下载依赖文件"));
+            InvokeStatusChangedEvent(0.45f, "开始下载依赖文件");
             libraries.ForEach(x => x.Url = UrlExtension.Combine("https://maven.fabricmc.net", UrlExtension.Combine(LibraryResource.FormatName(x.Name).ToArray())));
 
             var downloader = new MultithreadedDownloader<LibraryResource>
                 (x => x.ToDownloadRequest(), libraries.Select(y => new LibraryResource { Root = GameCoreLocator.Root, Name = y.Name, Url = y.Url }).ToList());
-            downloader.ProgressChanged += (object sender, (float, string) e) => progress.Report((0.45f + 0.25f * e.Item1, "下载依赖文件中：" + e.Item2));
+            downloader.ProgressChanged += (object sender, (float, string) e) => InvokeStatusChangedEvent(0.45f + 0.25f * e.Item1, "下载依赖文件中：" + e.Item2);
 
             var multithreadedDownload = await downloader.DownloadAsync();
             #endregion
-                        
+
             #region Check Inherited Core
-            progress.Report((0.55f, "开始检查继承的核心"));
+            InvokeStatusChangedEvent(0.55f, "开始检查继承的核心");
             if (GameCoreLocator.GetGameCore(FabricBuild.Intermediary.Version) == null)
             {
-                await new GameCoreInstaller(GameCoreLocator, FabricBuild.Intermediary.Version).InstallAsync(delegate ((float, string) e)
-                {
-                    progress.Report((0.7f + (0.85f - 0.7f) * e.Item1, "正在下载继承的游戏核心：" + e.Item2));
-                });
+                var installer = new GameCoreInstaller(GameCoreLocator, FabricBuild.Intermediary.Version);
+                installer.ProgressChanged += (_, e) => {
+                    InvokeStatusChangedEvent(0.45f + (0.85f - 0.45f) * e.Progress, "正在下载继承的游戏核心：" + e.ProgressDescription);
+                };
+
+                await installer.InstallAsync();
             }
             #endregion
 
             #region Write File
-            progress.Report((0.85f, "开始写入文件"));
+            InvokeStatusChangedEvent(0.85f, "开始写入文件");
             var entity = new FabricGameCoreJsonEntity
             {
                 Id = string.IsNullOrEmpty(CustomId) ? $"fabric-loader-{FabricBuild.Loader.Version}-{FabricBuild.Intermediary.Version}" : CustomId,
@@ -89,18 +87,18 @@ namespace MinecraftLaunch.Modules.Installer
 
             var versionJsonFile = new FileInfo(Path.Combine(GameCoreLocator.Root.FullName, "versions", entity.Id, $"{entity.Id}.json"));
 
-            if (!versionJsonFile.Directory.Exists)
+            if (!versionJsonFile.Directory!.Exists)
                 versionJsonFile.Directory.Create();
 
             File.WriteAllText(versionJsonFile.FullName, entity.ToJson());
             #endregion
 
-            progress.Report((1f, "安装完成"));
+            InvokeStatusChangedEvent(1f, "安装完成");
             return new InstallerResponse
             {
                 Success = true,
                 GameCore = GameCoreLocator.GetGameCore(entity.Id),
-                Exception = null
+                Exception = null!
             };
         }
 
@@ -146,10 +144,6 @@ namespace MinecraftLaunch.Modules.Installer
         public GameCoreToolkit GameCoreLocator { get; private set; }
 
         public string CustomId { get; private set; }
-
-        public FabricInstaller()
-        {
-        }
 
         public FabricInstaller(GameCoreToolkit coreLocator, FabricInstallBuild build, string customId = null)
         {

@@ -40,15 +40,16 @@ public class ModsPacksInstaller : InstallerBase
 		IProgress<(float, string)> progress = new Progress<(float, string)>();
 		((Progress<(float, string)>)progress).ProgressChanged += ProgressChanged;
 		progress.Report((0.1f, "开始获取整合包信息"));
+
 		ModsPacksModel info = await GetModsPacksInfo();
 		_needToDownload = info.Files.Count;
 		string idpath = Path.Combine(Path.GetFullPath(GamePath), "versions", string.IsNullOrEmpty(GameId) ? info.Name : GameId);
 		DirectoryInfo di = new DirectoryInfo(Path.Combine(idpath, "mods"));
-		if (!di.Exists)
-		{
+		if (!di.Exists) {		
 			di.Create();
 		}
 		progress.Report((0.4f, "开始解析整合包模组链接"));
+
 		TransformManyBlock<IEnumerable<ModsPacksFileModel>, (long, long)> urlBlock = new TransformManyBlock<IEnumerable<ModsPacksFileModel>, (long, long)>((IEnumerable<ModsPacksFileModel> urls) => urls.Select((ModsPacksFileModel file) => (file.ProjectId, file.FileId)));
 		using (ZipArchive subPath = ZipFile.OpenRead(ModPacksPath))
 		{
@@ -68,6 +69,7 @@ public class ModsPacksInstaller : InstallerBase
 		}
 		GameCoreToolkit.GetGameCore(GamePath, GameId);
 		progress.Report((0.45f, "开始下载整合包模组"));
+
 		ActionBlock<(long, long)> actionBlock = new ActionBlock<(long, long)>(async delegate((long, long) t)
 		{
 			_ = 1;
@@ -105,10 +107,9 @@ public class ModsPacksInstaller : InstallerBase
 		urlBlock.Complete();
 		await actionBlock.Completion;
 		progress.Report((1f, "安装完成"));
-		Console.WriteLine(_failedFiles);
+
 		if (_failedFiles != -1)
 		{
-			Console.WriteLine(_failedFiles);
 			return new InstallerResponse
 			{
 				Exception = null,

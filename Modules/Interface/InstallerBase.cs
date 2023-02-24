@@ -4,11 +4,11 @@ namespace MinecraftLaunch.Modules.Interface;
 
 public class InstallerBase
 {
-	public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
+	public event EventHandler<ProgressChangedEventArgs>? ProgressChanged;
 
-	public void InvokeStatusChangedEvent(string progressdescription, float progress)
+	internal void InvokeStatusChangedEvent(float progress, string progressdescription)
 	{
-		this.ProgressChanged?.Invoke(this, new ProgressChangedEventArgs
+		this.ProgressChanged?.Invoke(this, new()
 		{
 			ProgressDescription = progressdescription,
 			Progress = progress
