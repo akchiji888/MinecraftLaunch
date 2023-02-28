@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MinecraftLaunch.Modules.Enum;
 using MinecraftLaunch.Modules.Models.Download;
 using Natsurainko.Toolkits.Network;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace MinecraftLaunch.Modules.Toolkits
@@ -87,6 +88,10 @@ namespace MinecraftLaunch.Modules.Toolkits
             return null;
         }
 
+        /// <summary>
+        /// 获取热门模组方法
+        /// </summary>
+        /// <returns></returns>
         public async ValueTask<List<CurseForgeModpack>> GetFeaturedModpacksAsync()
         {
             List<CurseForgeModpack> result = new List<CurseForgeModpack>();
@@ -104,7 +109,21 @@ namespace MinecraftLaunch.Modules.Toolkits
             catch
             {
             }
+
             return null;
+        }
+
+        /// <summary>
+        /// 获取模组下载链接
+        /// </summary>
+        /// <param name="addonId"></param>
+        /// <param name="fileId"></param>
+        /// <returns></returns>
+        public async ValueTask<string> GetModpackDownloadUrl(long addonId, long fileId)
+        {
+            string reqUrl = $"{API}/{addonId}/files/{fileId}/download-url";
+            using HttpResponseMessage res = await HttpWrapper.HttpGetAsync(reqUrl, Headers);
+            return JsonConvert.DeserializeObject<DataModel<string>>(await res.Content.ReadAsStringAsync())?.Data!;
         }
 
         public async ValueTask<List<CurseForgeModpackCategory>> GetCategories()
@@ -176,14 +195,11 @@ namespace MinecraftLaunch.Modules.Toolkits
     {
         private const string API = "https://api.curseforge.com/v1/mods";
 
-        private readonly string Key = string.Empty;
-
-        private HttpClient hc = new HttpClient();
+        public static string Key { get; set; } = string.Empty;
 
         private Dictionary<string, string> Headers => new Dictionary<string, string> { { "x-api-key", Key } };
 
-        public CurseForgeToolkit(string accesskey)
-        {
+        public CurseForgeToolkit(string accesskey) {       
             Key = accesskey;
         }
     }

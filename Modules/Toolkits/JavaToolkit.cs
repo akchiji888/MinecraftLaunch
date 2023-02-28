@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Versioning;
@@ -70,94 +71,27 @@ public sealed class JavaToolkit
 		}
 	}
 
-	[SupportedOSPlatform("windows")]
-	public static IEnumerable<JavaInfo> GetJavas()
+	public static IEnumerable<JavaInfo> GetJavas(bool Isallsearch = true)
 	{
+		List<string> temp = new();
         List<JavaInfo> ret = new();
-        try
-        {
-            string environmentVariable = Environment.GetEnvironmentVariable("Path");
-            List<string> JavaPreList = new List<string>();
-            string[] array = Strings.Split(environmentVariable.Replace("\\\\", "\\").Replace("/", "\\"), ";");
-            string[] array2 = array;
-            foreach (string obj in array2)
-            {
-                string pie = obj.Trim(" \"".ToCharArray());
-                if (!obj.EndsWith("\\"))
-                {
-                    pie += "\\";
+
+		try
+		{
+		    if (Isallsearch) {
+                foreach (var item in DriveInfo.GetDrives().AsParallel()) {               
+                    temp.AddRange(addSubDirectory(new DirectoryInfo(item.Name), "javaw.exe").Where(File.Exists));
                 }
 
-                if (File.Exists(obj + "javaw.exe"))
-                {
-                    JavaPreList.Add(pie);
+                GC.Collect();
+
+				foreach (var i in temp.AsParallel()) {				
+                    ret.Add(GetJavaInfo(i));
                 }
             }
+		}catch(Exception) { }
 
-            DriveInfo[] drives = DriveInfo.GetDrives();
-            for (int j = 0; j < drives.Length; j++)
-            {
-                JavaSearchFolder(new DirectoryInfo(drives[j].Name), ref JavaPreList, Source: false);
-            }
-
-            JavaSearchFolder(new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), ref JavaPreList, Source: false);
-            JavaSearchFolder(new DirectoryInfo(AppDomain.CurrentDomain.SetupInformation.ApplicationBase), ref JavaPreList, Source: false, IsFullSearch: true);
-            List<string> JavaWithoutReparse = new List<string>();
-            foreach (string Pair2 in JavaPreList)
-            {
-                FileSystemInfo Info = new FileInfo(Pair2.Replace("\\\\", "\\").Replace("/", "\\") + "javaw.exe");
-                do
-                {
-                    if (!Info.Attributes.HasFlag(FileAttributes.ReparsePoint))
-                    {
-                        Info = ((Info is FileInfo) ? ((FileInfo)Info).Directory : ((DirectoryInfo)Info).Parent)!;
-                    }
-                }
-                while (Info != null);
-                JavaWithoutReparse.Add(Pair2);
-            }
-
-            if (JavaWithoutReparse.Count > 0)
-            {
-                JavaPreList = JavaWithoutReparse;
-            }
-
-            List<string> JavaWithoutInherit = new List<string>();
-            foreach (string Pair in JavaPreList)
-            {
-                if (!Pair.Contains("javapath_target_")) {               
-                    JavaWithoutInherit.Add(Pair);
-                }
-            }
-
-            if (JavaWithoutInherit.Count > 0)
-            {
-                JavaPreList = JavaWithoutInherit;
-            }
-
-            JavaPreList.Sort((string x, string s) => x.CompareTo(s));
-            foreach (string i in JavaPreList.AsParallel())
-            {
-                JavaInfo? res = GetJavaInfo(i);
-                if (res != null)
-                {
-                    ret.Add(new JavaInfo
-                    {
-                        Is64Bit = res.Is64Bit,
-                        JavaDirectoryPath = i,
-                        JavaSlugVersion = res.JavaSlugVersion,
-                        JavaVersion = res.JavaVersion,
-                        JavaPath = Path.Combine(i, "javaw.exe")
-                    });
-                }
-            }
-        }
-        finally
-        {
-            GC.Collect();
-        }
-
-        return ret;
+		return ret;
     }
 
     public static JavaInfo GetCorrectOfGameJava(IEnumerable<JavaInfo> Javas, GameCore gameCore)
@@ -184,98 +118,27 @@ public sealed class JavaToolkit
 		return res;
 	}
 
-	private static void JavaSearchFolder(DirectoryInfo OriginalPath, ref List<string> Results, bool Source, bool IsFullSearch = false)
-	{
-		try
-		{
-			if (!OriginalPath.Exists)
-			{
-				return;
+    static List<string> addSubDirectory(DirectoryInfo directory, string pattern)
+    {
+		List<string> files = new List<string>();
+        try
+        {
+            foreach (FileInfo fi in directory.GetFiles(pattern).AsParallel()) {
+				files.Add(fi.FullName);
 			}
-			string Path = OriginalPath.FullName.Replace("\\\\", "\\");
-			if (!Path.EndsWith("\\"))
-			{
-				Path += "\\";
-			}
-			if (File.Exists(Path + "javaw.exe"))
-			{
-				Results.Add(Path);
-			}
-			foreach (DirectoryInfo FolderInfo in OriginalPath.EnumerateDirectories())
-			{
-				if (!FolderInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
-				{
-					string SearchEntry = GetFolderNameFromPath(FolderInfo.Name).ToLower();
-					if (IsFullSearch || FolderInfo.Parent.Name.ToLower() == "users" ||
-						SearchEntry.Contains("java") || SearchEntry.Contains("jdk") ||
-						SearchEntry.Contains("env") || SearchEntry.Contains("环境") ||
-						SearchEntry.Contains("run") || SearchEntry.Contains("软件") ||
-						SearchEntry.Contains("jre") || SearchEntry == "bin" ||
-						SearchEntry.Contains("mc") || SearchEntry.Contains("software") ||
-						SearchEntry.Contains("cache") || SearchEntry.Contains("temp") ||
-						SearchEntry.Contains("corretto") || SearchEntry.Contains("roaming") ||
-						SearchEntry.Contains("users") || SearchEntry.Contains("craft") ||
-						SearchEntry.Contains("program") || SearchEntry.Contains("世界") ||
-						SearchEntry.Contains("net") || SearchEntry.Contains("游戏") ||
-						SearchEntry.Contains("oracle") || SearchEntry.Contains("game") ||
-						SearchEntry.Contains("file") || SearchEntry.Contains("data") ||
-						SearchEntry.Contains("jvm") || SearchEntry.Contains("服务") ||
-						SearchEntry.Contains("server") || SearchEntry.Contains("客户") ||
-						SearchEntry.Contains("client") || SearchEntry.Contains("整合") || 
-						SearchEntry.Contains("应用") || SearchEntry.Contains("运行") ||
-						SearchEntry.Contains("前置") || SearchEntry.Contains("mojang") ||
-						SearchEntry.Contains("官启") || SearchEntry.Contains("新建文件夹") || 
-						SearchEntry.Contains("eclipse") || SearchEntry.Contains("microsoft") || 
-						SearchEntry.Contains("hotspot") || SearchEntry.Contains("runtime") ||
-						SearchEntry.Contains("x86") || SearchEntry.Contains("x64") || 
-						SearchEntry.Contains("forge") || SearchEntry.Contains("原版") ||
-						SearchEntry.Contains("optifine") || SearchEntry.Contains("官方") ||
-						SearchEntry.Contains("启动") || SearchEntry.Contains("hmcl") || 
-						SearchEntry.Contains("mod") || SearchEntry.Contains("高清") ||
-						SearchEntry.Contains("download") || SearchEntry.Contains("launch") ||
-						SearchEntry.Contains("程序") || SearchEntry.Contains("path") ||
-						SearchEntry.Contains("国服") || SearchEntry.Contains("网易") ||
-						SearchEntry.Contains("ext") || SearchEntry.Contains("netease") ||
-						SearchEntry.Contains("1.") || SearchEntry.Contains("启动"))
-					{
-						JavaSearchFolder(FolderInfo, ref Results, Source);
-					}
-				}
-			}
-		}
-		catch (UnauthorizedAccessException)
-		{
-		}
-		catch (Exception)
-		{
-		}
-	}
 
-	private static string GetFolderNameFromPath(string FolderPath)
-	{
-		if (FolderPath.EndsWith(":\\") || FolderPath.EndsWith(":\\\\"))
+            foreach (DirectoryInfo di in directory.GetDirectories().AsParallel()) {           
+                addSubDirectory(di, pattern);
+            }
+        }
+		catch 
 		{
-			return FolderPath.Substring(0, 1);
 		}
-		if (FolderPath.EndsWith("\\") || FolderPath.EndsWith("/"))
-			FolderPath = Strings.Left(FolderPath, FolderPath.Length - 1);
-		return GetFileNameFromPath(FolderPath);
-	}
+		finally
+		{
+			GC.Collect();
+		}
 
-	private static string GetFileNameFromPath(string FilePath)
-	{
-		if (FilePath.EndsWith("\\") || FilePath.EndsWith("/"))
-		{
-			throw new Exception("不包含文件名：" + FilePath);
-		}
-		if (!FilePath.Contains("\\") && !FilePath.Contains("/"))
-		{
-			return FilePath;
-		}
-		if (FilePath.Contains("?"))
-		{
-			FilePath = Strings.Left(FilePath, FilePath.LastIndexOf("?"));
-		}
-		return Strings.Mid(FilePath, 0);
-	}
+		return files;	
+    }
 }
