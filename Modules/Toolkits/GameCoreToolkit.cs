@@ -102,12 +102,47 @@ public class GameCoreToolkit
 		var gameCores = GetGameCores();
 		var endCores = new List<GameCore>();
 
-		var firstScearh = gameCores.Where(x => x.Id!.Contains(text));
-		if (!firstScearh.Any()) {
-			endCores.AddRange(SpotLightScearh(text));
+		var firstScearh = gameCores.Where(x => x.Id!.Contains(text));//标准筛查 -1
+
+		if (!firstScearh.Any()) {			
+			endCores.AddRange(SpotLightScearh(text, gameCores) ?? new List<GameCore>());//条件筛查 -2
+		} else endCores.AddRange(firstScearh);
+
+		if (!endCores.Any()) {//拼音筛查 -3 End	
+			endCores.AddRange(gameCores.Where(x =>//全拼筛查
+			{			
+				try {
+					var spell = StringToolkit.GetSpell(x.Id!).ToLower();
+
+                    if (spell.Contains(text.ToLower())) {
+						return true;
+					}
+				}
+				catch (Exception) {
+					throw;
+				}
+
+				return false;
+			}));
+
+			endCores.AddRange(gameCores.Where(x =>//首字母筛查
+			{
+				try {
+                    var firstspell = StringToolkit.GetFirstSpell(x.Id!).ToLower();
+
+                    if (firstspell.Contains(text.ToLower())) {
+						return true;
+					}
+                }
+                catch (Exception) { 
+				}
+
+				return false;
+			}));
 		}
 
-		return endCores;
+		GC.Collect();
+		return endCores.Distinct();
 	}
 
 	public static GameCore GameCoreNameChange(string root, string oldid, string newid)
@@ -203,12 +238,41 @@ public class GameCoreToolkit
 		return new GameCoreParser(new DirectoryInfo(root), entities).GetGameCores();
 	}
 
-	internal IEnumerable<GameCore> SpotLightScearh(string text) {
-		if (true) {		
+	internal IEnumerable<GameCore> SpotLightScearh(string text, IEnumerable<GameCore> cores) {
+        var endCores = new List<GameCore>();
+
+        if (text.StartsWith("-v")) {//通过版本搜索		
+			var condition = text.Replace("-v", "").TrimStart().ToLower();
 			
+            endCores.AddRange(cores.Where(x =>
+			{
+                if (!string.IsNullOrEmpty(x.InheritsFrom) && x.InheritsFrom.Contains(condition)) {
+					return true;
+				}
+
+				if (!string.IsNullOrEmpty(x.Source) && x.Source.Contains(condition)) {
+					return true;
+				}
+
+				return false;
+			}));
 		}
 
-		return null;
+		if (text.StartsWith("-l")) {//通过模组加载器搜索
+            var condition = text.Replace("-l", "").TrimStart().ToLower();
+			endCores.AddRange(cores.Where(x =>
+			{
+				foreach (var i in x.ModLoaderInfos) {
+                    if (i.ModLoaderType.ToString().ToLower().Contains(condition)) {                 
+						return true;
+                    }
+                }
+
+                return false;
+			}));
+        }
+
+		return endCores!;
 	}
 
 	internal static GameCoreJsonEntity GetGameCoreJsonEntity(string root, string id, string inheritsfrom)
