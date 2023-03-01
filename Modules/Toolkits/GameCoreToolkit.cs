@@ -98,6 +98,18 @@ public class GameCoreToolkit
 		return gameCores;
 	}
 
+	public IEnumerable<GameCore> GameCoreScearh(string text) { 
+		var gameCores = GetGameCores();
+		var endCores = new List<GameCore>();
+
+		var firstScearh = gameCores.Where(x => x.Id!.Contains(text));
+		if (!firstScearh.Any()) {
+			endCores.AddRange(SpotLightScearh(text));
+		}
+
+		return endCores;
+	}
+
 	public static GameCore GameCoreNameChange(string root, string oldid, string newid)
 	{
 		FileInfo gamejson = new FileInfo(Path.Combine(root, "versions", oldid, oldid + ".json"));
@@ -189,6 +201,14 @@ public class GameCoreToolkit
 			}
 		}
 		return new GameCoreParser(new DirectoryInfo(root), entities).GetGameCores();
+	}
+
+	internal IEnumerable<GameCore> SpotLightScearh(string text) {
+		if (true) {		
+			
+		}
+
+		return null;
 	}
 
 	internal static GameCoreJsonEntity GetGameCoreJsonEntity(string root, string id, string inheritsfrom)
