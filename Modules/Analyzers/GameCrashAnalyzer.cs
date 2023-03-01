@@ -1,17 +1,7 @@
-﻿using Microsoft.VisualBasic;
-using MinecraftLaunch.Modules.Enum;
+﻿using MinecraftLaunch.Modules.Enum;
 using MinecraftLaunch.Modules.Interface;
-using MinecraftLaunch.Modules.Models.Download;
-using MinecraftLaunch.Modules.Models.Launch;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Net.Security;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace MinecraftLaunch.Modules.Analyzers
 {
