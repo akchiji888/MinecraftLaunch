@@ -8,7 +8,7 @@ using MinecraftLaunch.Modules.Interface;
 
 namespace MinecraftLaunch.Modules.Models.Launch;
 
-public class JavaClientLaunchResponse : IDisposable
+public class MinecraftLaunchResponse : IDisposable
 {
 	private bool disposedValue;
 
@@ -103,7 +103,7 @@ public class JavaClientLaunchResponse : IDisposable
 		}
 	}
 
-	public JavaClientLaunchResponse(Process process, LaunchState state, IEnumerable<string> args)
+	public MinecraftLaunchResponse(Process process, LaunchState state, IEnumerable<string> args)
 	{
 		Process = process;
 		State = state;
@@ -135,7 +135,7 @@ public class JavaClientLaunchResponse : IDisposable
 		}
 	}
 
-	public JavaClientLaunchResponse(Process process, LaunchState state, IEnumerable<string> args, Exception exception)
+	public MinecraftLaunchResponse(Process process, LaunchState state, IEnumerable<string> args, Exception exception)
 	{
 		Process = process;
 		State = state;

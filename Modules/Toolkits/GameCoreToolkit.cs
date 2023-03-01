@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using MinecraftLaunch.Modules.Models.Launch;
 using MinecraftLaunch.Modules.Parser;
 
@@ -140,7 +136,8 @@ public class GameCoreToolkit
 
 					return true;
                 }
-                catch (Exception) { 
+                catch (Exception) {
+					throw;
 				}
 
 				return false;
