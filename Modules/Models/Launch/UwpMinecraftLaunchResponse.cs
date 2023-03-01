@@ -6,7 +6,7 @@ using MinecraftLaunch.Modules.Enum;
 
 namespace MinecraftLaunch.Modules.Models.Launch;
 
-public class UwpClientLaunchResponse : IDisposable
+public class UwpMinecraftLaunchResponse : IDisposable
 {
 	private bool disposedValue;
 
@@ -52,7 +52,7 @@ public class UwpClientLaunchResponse : IDisposable
 		}
 	}
 
-	public UwpClientLaunchResponse(Process process, LaunchState state, IEnumerable<string> args)
+	public UwpMinecraftLaunchResponse(Process process, LaunchState state, IEnumerable<string> args)
 	{
 		Process = process;
 		State = state;
@@ -62,7 +62,7 @@ public class UwpClientLaunchResponse : IDisposable
 		}
 	}
 
-	public UwpClientLaunchResponse(Process process, LaunchState state, IEnumerable<string> args, Exception exception)
+	public UwpMinecraftLaunchResponse(Process process, LaunchState state, IEnumerable<string> args, Exception exception)
 	{
 		Process = process;
 		State = state;

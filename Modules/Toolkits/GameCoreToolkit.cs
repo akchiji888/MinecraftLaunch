@@ -131,10 +131,10 @@ public class GameCoreToolkit
 							if (c.Id!.ToLower() == firstspell) {
 								return false;
 							}
-						}						
-					}
+						}
 
-					return true;
+                        return true;
+                    }
                 }
                 catch (Exception) {
 					throw;

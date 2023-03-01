@@ -8,11 +8,11 @@ using MinecraftLaunch.Modules.Models.Launch;
 
 namespace MinecraftLaunch.Launch;
 
-public class UwpClientLauncher : LauncherBase<object, UwpClientLaunchResponse>
+public class UwpMinecraftLauncher : LauncherBase<object, UwpMinecraftLaunchResponse>
 {
 	public new LaunchConfig LaunchSetting { get; set; }
 
-	public override async ValueTask<UwpClientLaunchResponse> LaunchTaskAsync(Action<(float, string)> action)
+	public override async ValueTask<UwpMinecraftLaunchResponse> LaunchTaskAsync(Action<(float, string)> action)
 	{
 		IProgress<(float, string)> progress = new Progress<(float, string)>();
 		((Progress<(float, string)>)progress).ProgressChanged += ProgressChanged;
@@ -37,7 +37,7 @@ public class UwpClientLauncher : LauncherBase<object, UwpClientLaunchResponse>
 			if (string.IsNullOrEmpty(checkprocess.StandardOutput.ReadToEnd()))
 			{
 				((Progress<(float, string)>)progress).ProgressChanged -= ProgressChanged;
-				return await Task.FromResult(new UwpClientLaunchResponse(null, LaunchState.Failed, null));
+				return await Task.FromResult(new UwpMinecraftLaunchResponse(null, LaunchState.Failed, null));
 			}
 			progress.Report((1f, "正在尝试启动游戏"));
 			process = new Process
@@ -50,7 +50,7 @@ public class UwpClientLauncher : LauncherBase<object, UwpClientLaunchResponse>
 			};
 			Stopwatch stopWatch = new Stopwatch();
 			stopWatch.Start();
-			return new UwpClientLaunchResponse(process, LaunchState.Succeess, args)
+			return new UwpMinecraftLaunchResponse(process, LaunchState.Succeess, args)
 			{
 				RunTime = stopWatch
 			};
@@ -59,9 +59,9 @@ public class UwpClientLauncher : LauncherBase<object, UwpClientLaunchResponse>
 		{
 			if (ex.GetType() == typeof(OperationCanceledException))
 			{
-				return await Task.FromResult(new UwpClientLaunchResponse(process, LaunchState.Cancelled, args));
+				return await Task.FromResult(new UwpMinecraftLaunchResponse(process, LaunchState.Cancelled, args));
 			}
-			return await Task.FromResult(new UwpClientLaunchResponse(process, LaunchState.Failed, args, ex));
+			return await Task.FromResult(new UwpMinecraftLaunchResponse(process, LaunchState.Failed, args, ex));
 		}
 	}
 }
