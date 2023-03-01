@@ -105,7 +105,7 @@ public class GameCoreToolkit
 		var firstScearh = gameCores.Where(x => x.Id!.Contains(text));//标准筛查 -1
 
 		if (!firstScearh.Any()) {			
-			endCores.AddRange(SpotLightScearh(text, gameCores) ?? new List<GameCore>());//条件筛查 -2
+			endCores.AddRange(PolymerizeScearh(text, gameCores) ?? new List<GameCore>());//条件筛查 -2
 		} else endCores.AddRange(firstScearh);
 
 		if (!endCores.Any()) {//拼音筛查 -3 End	
@@ -238,7 +238,7 @@ public class GameCoreToolkit
 		return new GameCoreParser(new DirectoryInfo(root), entities).GetGameCores();
 	}
 
-	internal IEnumerable<GameCore> SpotLightScearh(string text, IEnumerable<GameCore> cores) {
+	internal IEnumerable<GameCore> PolymerizeScearh(string text, IEnumerable<GameCore> cores) {
         var endCores = new List<GameCore>();
 
         if (text.StartsWith("-v")) {//通过版本搜索		

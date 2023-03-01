@@ -89,6 +89,78 @@ namespace MinecraftLaunch.Modules.Toolkits
         }
 
         /// <summary>
+        /// 资源包搜索方法
+        /// </summary>
+        /// <param name="searchFilter"></param>
+        /// <param name="modLoaderType"></param>
+        /// <param name="gameVersion"></param>
+        /// <param name="category"></param>
+        /// <returns></returns>
+        public async ValueTask<List<CurseForgeModpack>> SearchResourcePackAsync(string searchFilter, string gameVersion = null, int category = -1)
+        {
+            var builder = new StringBuilder(API)
+                .Append($"/search?gameId=432")
+                .Append(string.IsNullOrEmpty(searchFilter) ? string.Empty : $"&searchFilter={searchFilter}")
+                .Append(string.IsNullOrEmpty(gameVersion) ? string.Empty : $"&gameVersion={gameVersion}")
+                .Append(category == -1 ? string.Empty : $"&categoryId={gameVersion}")
+                .Append("&sortField=Featured&sortOrder=desc&classId=12");
+
+            var result = new List<CurseForgeModpack>();
+
+            try
+            {
+                using var responseMessage = await HttpWrapper.HttpGetAsync(builder.ToString(), Headers);
+                responseMessage.EnsureSuccessStatusCode();
+
+                var entity = JObject.Parse(await responseMessage.Content.ReadAsStringAsync());
+                ((JArray)entity["data"]).ToList().ForEach(x => result.Add(ParseCurseForgeModpack((JObject)x)));
+
+                result.Sort((a, b) => a.GamePopularityRank.CompareTo(b.GamePopularityRank));
+
+                return result;
+            }
+            catch { }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 游戏地图搜索方法
+        /// </summary>
+        /// <param name="searchFilter"></param>
+        /// <param name="modLoaderType"></param>
+        /// <param name="gameVersion"></param>
+        /// <param name="category"></param>
+        /// <returns></returns>
+        public async ValueTask<List<CurseForgeModpack>> SearchGameMapAsync(string searchFilter, string gameVersion = null, int category = -1)
+        {
+            var builder = new StringBuilder(API)
+                .Append($"/search?gameId=432")
+                .Append(string.IsNullOrEmpty(searchFilter) ? string.Empty : $"&searchFilter={searchFilter}")
+                .Append(string.IsNullOrEmpty(gameVersion) ? string.Empty : $"&gameVersion={gameVersion}")
+                .Append(category == -1 ? string.Empty : $"&categoryId={gameVersion}")
+                .Append("&sortField=Featured&sortOrder=desc&classId=17");
+
+            var result = new List<CurseForgeModpack>();
+
+            try
+            {
+                using var responseMessage = await HttpWrapper.HttpGetAsync(builder.ToString(), Headers);
+                responseMessage.EnsureSuccessStatusCode();
+                
+                var entity = JObject.Parse(await responseMessage.Content.ReadAsStringAsync());
+                ((JArray)entity["data"]).ToList().ForEach(x => result.Add(ParseCurseForgeModpack((JObject)x)));
+
+                result.Sort((a, b) => a.GamePopularityRank.CompareTo(b.GamePopularityRank));
+
+                return result;
+            }
+            catch { }
+
+            return null;
+        }
+
+        /// <summary>
         /// 获取热门模组方法
         /// </summary>
         /// <returns></returns>
@@ -179,15 +251,6 @@ namespace MinecraftLaunch.Modules.Toolkits
             modpack.SupportedVersions = modpack.Files.Keys.ToArray();
 
             return modpack;
-        }
-
-        [Obsolete]
-        protected HttpRequestMessage SetHttpHeaders(HttpMethod method, string url)
-        {
-            return new HttpRequestMessage(method, url)
-            {
-                Headers = { { "x-api-key", Key } }
-            };
         }
     }
 

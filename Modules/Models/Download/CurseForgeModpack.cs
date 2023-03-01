@@ -89,3 +89,8 @@ public class CurseForgeModpack
 		}
 	}
 }
+
+public class CurseForgeResourcePack : CurseForgeModpack
+{
+
+}
