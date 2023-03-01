@@ -102,7 +102,7 @@ public class GameCoreToolkit
 		var gameCores = GetGameCores();
 		var endCores = new List<GameCore>();
 
-		var firstScearh = gameCores.Where(x => x.Id!.Contains(text));//标准筛查 -1
+		var firstScearh = gameCores.Where(x => x.Id!.ToLower().Contains(text.ToLower()));//标准筛查 -1
 
 		if (!firstScearh.Any()) {			
 			endCores.AddRange(PolymerizeScearh(text, gameCores) ?? new List<GameCore>());//条件筛查 -2
@@ -131,8 +131,14 @@ public class GameCoreToolkit
                     var firstspell = StringToolkit.GetFirstSpell(x.Id!).ToLower();
 
                     if (firstspell.Contains(text.ToLower())) {
-						return true;
+						foreach(var c in endCores) { //mlgb，与标准筛查冲突了，手动检测是否有相同的游戏核心
+							if (c.Id!.ToLower() == firstspell) {
+								return false;
+							}
+						}						
 					}
+
+					return true;
                 }
                 catch (Exception) { 
 				}
