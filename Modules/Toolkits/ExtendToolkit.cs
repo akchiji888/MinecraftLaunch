@@ -223,4 +223,8 @@ public static class ExtendToolkit
     public static bool IsFile(this string path) => File.Exists(path);
 
     public static bool IsFile(this FileInfo path) => path!.Exists;
+
+	public static DirectoryInfo[] FindAllDirectory(this string path) => Directory.GetDirectories(path).Select(x => new DirectoryInfo(x)).ToArray();
+
+    public static FileInfo[] FindAllFile(this string path) => Directory.GetFiles(path).Select(x => new FileInfo(x)).ToArray();
 }

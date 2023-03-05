@@ -60,8 +60,8 @@ public class GameCoreToolkit
 		directory.Delete();
 	}
 
-	public IEnumerable<GameCore> GetGameCores()
-	{
+	public IEnumerable<GameCore> GetGameCores() {
+	
 		List<GameCoreJsonEntity> entities = new List<GameCoreJsonEntity>();
 		DirectoryInfo versionsFolder = new DirectoryInfo(Path.Combine(Root.FullName, "versions"));
 		if (!versionsFolder.Exists)
@@ -70,10 +70,10 @@ public class GameCoreToolkit
 			return Array.Empty<GameCore>();
 		}
 		DirectoryInfo[] directories = versionsFolder.GetDirectories();
-		foreach (DirectoryInfo item in directories)
+		foreach (DirectoryInfo item in directories.AsParallel())
 		{
 			FileInfo[] files2 = item.GetFiles();
-			foreach (FileInfo files in files2)
+			foreach (FileInfo files in files2.AsParallel())
 			{
 				if (files.Name == item.Name + ".json")
 				{
@@ -326,4 +326,6 @@ public class GameCoreToolkit
 	public static implicit operator GameCoreToolkit(string path) => new GameCoreToolkit(path);
 
     public static implicit operator GameCoreToolkit(DirectoryInfo path) => new GameCoreToolkit(path);
+
+    public static implicit operator GameCoreToolkit(GameCore path) => new GameCoreToolkit(path.Root);
 }

@@ -1,4 +1,7 @@
 ﻿using MinecraftLaunch.Modules.Interface;
+using MinecraftLaunch.Modules.Models.Download;
+using MinecraftLaunch.Modules.Models.Launch;
+using NbtLib;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -11,40 +14,76 @@ namespace MinecraftLaunch.Modules.Toolkits
     /// <summary>
     /// 存档操作工具箱
     /// </summary>
-    public partial class SavesToolkit
-    {
-        public ValueTask<ImmutableArray<decimal>> LoadAllAsync()
-        {
-            var names = Directory.GetDirectories(Path.Combine(Toolkit.Root.FullName, "versions"));
-            names.ToList().ForEach(x =>
-            {
+    public partial class SavesToolkit {   
+        public async ValueTask<ImmutableArray<Saves>> LoadAllAsync(GameCore core) {       
+            List<Saves> res = new();
+            var saves = Path.Combine(core.Root.FullName, "versions", core.Id, "saves");
+            
+            if (saves.IsDirectory()) { 
+                foreach (var i in saves.FindAllDirectory().AsParallel()) {
+                    List<SavesPlayer> players = new();
+                    var mainFile = Path.Combine(i.FullName, "level.dat");
+                    var playerData = Path.Combine(i.FullName, "playerdata");
+                    var currentsaves = new Saves();
 
-            });
-            throw new NotImplementedException();
+                    if (File.Exists(mainFile)) {                    
+                        var tags = NbtToolkit.Load(mainFile);
+                        var tag = (tags["Data"] as NbtCompoundTag)!;
+                        
+                        var saveName = ((NbtStringTag)tag["LevelName"]).Payload;
+                        var lastPlayed = ((NbtLongTag)tag["LastPlayed"]).Payload;
+                        var time = ((NbtLongTag)tag["Time"]).Payload;
+                        var gameType = ((NbtIntTag)tag["GameType"]).Payload;
+                        var hardCore = ((NbtByteTag)tag["hardcore"]).Payload;
+                        var hasVillages = ((NbtByteTag)tag["MapFeatures"]).Payload;
+                        var isRaining = ((NbtByteTag)tag["raining"]).Payload;
+                        var thundering = ((NbtByteTag)tag["thundering"]).Payload;
+
+                        currentsaves = new()
+                        {
+                            Id = saveName,
+                            LastPlayed = lastPlayed,
+                            GameType = gameType,
+                            HardCore = Convert.ToByte(hardCore),
+                            HasVillages = hasVillages is 1,
+                            IsRaining = isRaining is 1,
+                            IsThundering = thundering is 1,
+                            Time = time,
+                            RootGameCore = core
+                        };
+                    }
+
+                    if (playerData.IsDirectory()) {
+                        foreach (var p in playerData.FindAllFile().AsParallel()) {
+                            var tags = NbtToolkit.Load(p.FullName);
+
+                            players.Add(new()
+                            {
+                                PlayUuid = Path.GetFileNameWithoutExtension(p.Name),
+                                IsSleeping = ((NbtByteTag)tags["Sleeping"]).Payload is 1,
+                                FoodLevel = ((NbtIntTag)tags["foodLevel"]).Payload,
+                                Health = ((NbtShortTag)tags["Health"]).Payload
+                            });;
+                        }
+
+                        currentsaves.SavesPlayers = players;
+                    }
+
+                    res.Add(currentsaves);
+                }
+            }
+
+            return res.ToImmutableArray();
         }
     }
 
-    partial class SavesToolkit
-    {
-        public SavesToolkit(string path)
-        {
-            var info = new DirectoryInfo(path);
-            Toolkit = new(info);
-        }
-
-        public SavesToolkit(DirectoryInfo info)
-        {
-            Toolkit = new(info);
-        }
-
-        public SavesToolkit(GameCoreToolkit toolkit)
-        {
-            Toolkit = toolkit;
+    partial class SavesToolkit {   
+        public SavesToolkit(GameCoreToolkit core) {       
+            Toolkit = core;
         }
     }
 
-    partial class SavesToolkit
-    {
+    partial class SavesToolkit {   
         public GameCoreToolkit Toolkit { get; set; }
     }
 }
