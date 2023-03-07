@@ -35,12 +35,11 @@
 + 感谢开发过程中大佬[laolarou726](https://github.com/laolarou726)给出的建议和指导 不妨也看看他的启动核心项目[Projbobcat](https://github.com/Corona-Studio/ProjBobcat)
 
 ###  使用本核心制作的一些启动器
-+ EasyCraft Launcher(ECL)
 + ModernCraft Launcher（MCL）
 + Mexico Launcher
 + ThinICE Launcher
 + NoName Launcher
 + LobeCraft Launcher
-+ 青柠启动器
++ Lemon Launcher
 
 # [使用文档](https://baka_hs.gitee.io/xilu-baka/)
