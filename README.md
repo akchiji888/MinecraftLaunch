@@ -41,5 +41,6 @@
 + ThinICE Launcher
 + NoName Launcher
 + LobeCraft Launcher
++ 青柠启动器
 
 # [使用文档](https://baka_hs.gitee.io/xilu-baka/)
