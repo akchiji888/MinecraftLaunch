@@ -40,5 +40,6 @@
 + Mexico Launcher
 + ThinICE Launcher
 + NoName Launcher
++ LobeCraft Launcher
 
 # [使用文档](https://baka_hs.gitee.io/xilu-baka/)
