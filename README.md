@@ -23,6 +23,7 @@
 + 支持对CurseForge,Modrinth的api的封装
 + 支持游戏崩溃探测
 + 支持游戏日志解析
++ 支持对游戏存档、模组、资源包的解析、管理
 + 支持从[Bmclapi、Mcbbs](https://bmclapidoc.bangbang93.com/)下载源进行文件补全
   + 在此感谢bangbang93提供镜像站服务 如果您支持我们 可以 [赞助Bmclapi](https://afdian.net/@bangbang93)
   
@@ -30,7 +31,13 @@
   
   声明
 + BMCLAPI是@bangbang93开发的BMCL的一部分，用于解决国内线路对Forge和Minecraft官方使用的Amazon S3 速度缓慢的问题。BMCLAPI是对外开放的，所有需要Minecraft资源的启动器均可调用。
-+ 感谢开发过程中大佬[natsurainko](https://github.com/Natsurainko)给出的建议和指导 不妨也看看它的启动核心项目[Natsurainko.FluentCore](https://github.com/Xcube-Studio/Natsurainko.FluentCore)
-+ 感谢开发过程中大佬[laolarou726](https://github.com/laolarou726)给出的建议和指导 不妨也看看它的启动核心项目[Projbobcat](https://github.com/Corona-Studio/ProjBobcat)
++ 感谢开发过程中大佬[natsurainko](https://github.com/Natsurainko)给出的建议和指导 不妨也看看他的启动核心项目[Natsurainko.FluentCore](https://github.com/Xcube-Studio/Natsurainko.FluentCore)
++ 感谢开发过程中大佬[laolarou726](https://github.com/laolarou726)给出的建议和指导 不妨也看看他的启动核心项目[Projbobcat](https://github.com/Corona-Studio/ProjBobcat)
+
+  使用本核心制作的一些启动器
++ EasyCraft Launcher(ECL)
++ ModernCraft Launcher（MCL）
++ Mexico Launcher
++ ThinICE Launcher
 
 # [使用文档](https://baka_hs.gitee.io/xilu-baka/)
