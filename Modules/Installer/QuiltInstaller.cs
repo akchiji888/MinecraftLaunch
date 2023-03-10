@@ -16,7 +16,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MinecraftLaunch.Modules.Installer
 {
-    public class QuiltInstaller : InstallerBase
+    public class QuiltInstaller : InstallerBase<InstallerResponse>
     {
         public QuiltInstallBuild QuiltBuild { get; private set; }
 
@@ -85,7 +85,7 @@ namespace MinecraftLaunch.Modules.Installer
             });
         }
 
-        public async ValueTask<InstallerResponse> InstallAsync()
+        public override async ValueTask<InstallerResponse> InstallAsync()
         {
             int count = 0;
             int post = 0;

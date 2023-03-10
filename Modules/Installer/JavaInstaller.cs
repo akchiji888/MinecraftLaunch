@@ -14,7 +14,7 @@ using Natsurainko.Toolkits.Network.Model;
 
 namespace MinecraftLaunch.Modules.Installer
 {
-    public partial class JavaInstaller : InstallerBase
+    public partial class JavaInstaller : InstallerBase<JavaInstallerResponse>
     {
         public static (string, string, PcType) ActiveJdk;
 
@@ -72,19 +72,16 @@ namespace MinecraftLaunch.Modules.Installer
 
         public static string StorageFolder => ActiveJdk.Item2;
 
-        public async ValueTask<JavaInstallerResponse> InstallAsync(Action<(float, string)> action)
+        public override async ValueTask<JavaInstallerResponse> InstallAsync()
         {
-            Action<(float, string)> action2 = action;
-            IProgress<(float, string)> progress = new Progress<(float, string)>();
-            ((Progress<(float, string)>)progress).ProgressChanged += ProgressChanged;
             try
             {
                 string item = ActiveJdk.Item1;
                 _ = ActiveJdk;
-                progress.Report((0.1f, "开始下载 Jdk"));
+                //progress.Report((0.1f, "开始下载 Jdk"));
                 HttpDownloadResponse res = await HttpWrapper.HttpDownloadAsync(item, Path.GetTempPath(), (Action<float, string>)delegate (float e, string a)
                 {
-                    progress.Report((0.1f + e * 0.8f, "下载中：" + a));
+                    //progress.Report((0.1f + e * 0.8f, "下载中：" + a));
                 }, (string)null);
                 if (res.HttpStatusCode != HttpStatusCode.OK)
                 {
@@ -95,12 +92,12 @@ namespace MinecraftLaunch.Modules.Installer
                         JavaInfo = null
                     };
                 }
-                progress.Report((0.8f, "开始解压 Jdk"));
+                //progress.Report((0.8f, "开始解压 Jdk"));
                 await Task.Delay(1000);
                 ZipFile.ExtractToDirectory(res.FileInfo.FullName, StorageFolder);
-                progress.Report((0.95f, "开始删除 下载缓存"));
+                //progress.Report((0.95f, "开始删除 下载缓存"));
                 res.FileInfo.Delete();
-                progress.Report((1f, "安装完成"));
+                //progress.Report((1f, "安装完成"));
                 return new JavaInstallerResponse
                 {
                     Success = true,
@@ -116,10 +113,6 @@ namespace MinecraftLaunch.Modules.Installer
                     Exception = ex,
                     JavaInfo = null
                 };
-            }
-            void ProgressChanged(object _, (float, string) e)
-            {
-                action2(e);
             }
         }
     }

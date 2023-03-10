@@ -11,9 +11,9 @@ using Newtonsoft.Json;
 
 namespace MinecraftLaunch.Modules.Installer
 {
-    public partial class GameCoreInstaller : InstallerBase
+    public partial class GameCoreInstaller : InstallerBase<InstallerResponse>
     {
-        public async ValueTask<InstallerResponse> InstallAsync()
+        public override async ValueTask<InstallerResponse> InstallAsync()
         {
             try
             {

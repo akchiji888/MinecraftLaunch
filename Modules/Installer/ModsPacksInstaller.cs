@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 
 namespace MinecraftLaunch.Modules.Installer;
 
-public class ModsPacksInstaller : InstallerBase
+public class ModsPacksInstaller : InstallerBase<InstallerResponse>
 {
 	private int _totalDownloaded;
 
@@ -39,7 +39,7 @@ public class ModsPacksInstaller : InstallerBase
         GameId = gameid;
     }
 
-    public async ValueTask<InstallerResponse> InstallAsync()
+    public override async ValueTask<InstallerResponse> InstallAsync()
 	{
 		InvokeStatusChangedEvent(0.1f, "开始获取整合包信息");
 

@@ -2,11 +2,13 @@ using System;
 
 namespace MinecraftLaunch.Modules.Interface;
 
-public class InstallerBase
+public abstract class InstallerBase<T>
 {
 	public event EventHandler<ProgressChangedEventArgs>? ProgressChanged;
 
-	internal void InvokeStatusChangedEvent(float progress, string progressdescription)
+	public abstract ValueTask<T> InstallAsync();
+
+    internal void InvokeStatusChangedEvent(float progress, string progressdescription)
 	{
 		this.ProgressChanged?.Invoke(this, new()
 		{

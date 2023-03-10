@@ -21,7 +21,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MinecraftLaunch.Modules.Installer
 {
-    public partial class ForgeInstaller : InstallerBase
+    public partial class ForgeInstaller : InstallerBase<InstallerResponse>
     {
         private GameCoreJsonEntity GetGameCoreJsonEntity(ZipArchive archive, JObject installProfile)
         {
@@ -47,7 +47,7 @@ namespace MinecraftLaunch.Modules.Installer
             return libraries;
         }
 
-        public async ValueTask<InstallerResponse> InstallAsync()
+        public override async ValueTask<InstallerResponse> InstallAsync()
         {
             #region Download Package
             InvokeStatusChangedEvent(0f, "开始下载 Forge 安装包");

@@ -16,9 +16,9 @@ using Newtonsoft.Json.Linq;
 
 namespace MinecraftLaunch.Modules.Installer
 {
-    public partial class FabricInstaller : InstallerBase
+    public partial class FabricInstaller : InstallerBase<InstallerResponse>
     {
-        public async ValueTask<InstallerResponse> InstallAsync()
+        public override async ValueTask<InstallerResponse> InstallAsync()
         {
             #region Parse Build
             InvokeStatusChangedEvent(0.25f, "开始分析生成");

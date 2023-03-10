@@ -18,7 +18,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace MinecraftLaunch.Modules.Installer;
 
-public class ResourceInstaller : InstallerBase
+public class ResourceInstaller
 {
 	public GameCore GameCore { get; set; }
 
@@ -26,7 +26,7 @@ public class ResourceInstaller : InstallerBase
 
 	public static int MaxDownloadThreads { get; set; } = 64;
 
-    public async Task<ResourceInstallResponse> DownloadAsync(Action<string, float> func)
+    public async ValueTask<ResourceInstallResponse> DownloadAsync(Action<string, float> func)
     {
         var progress = new Progress<(string, float)>();
         var root = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);

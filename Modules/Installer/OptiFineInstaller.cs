@@ -20,7 +20,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MinecraftLaunch.Modules.Installer
 {
-    public class OptiFineInstaller : InstallerBase
+    public class OptiFineInstaller : InstallerBase<InstallerResponse>
     {
         public string CustomId { get; private set; }
 
@@ -32,7 +32,7 @@ namespace MinecraftLaunch.Modules.Installer
 
         public string PackageFile { get; private set; }
 
-        public async ValueTask<InstallerResponse> InstallAsync()
+        public override async ValueTask<InstallerResponse> InstallAsync()
         {
             #region Download PackageFile
             InvokeStatusChangedEvent(0f, "开始下载 OptiFine 安装包");
