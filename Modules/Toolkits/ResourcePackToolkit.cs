@@ -35,8 +35,8 @@ public class ResourcePackToolkit : IPackToolkit<ResourcePack>
 
 	public async ValueTask<ImmutableArray<ResourcePack>> LoadAllAsync()
 	{
-		string optionsFile = (WorkingDirectory.EndsWith('/') ? WorkingDirectory : (WorkingDirectory + "\\options.txt"));
-		Console.WriteLine(optionsFile);
+        string optionsFile = (WorkingDirectory.EndsWith('/') ? WorkingDirectory : Path.Combine(WorkingDirectory, "options.txt"));
+        
 		string?[] enabledPacksIds = null;
 		if (File.Exists(optionsFile))
 		{
@@ -87,8 +87,8 @@ public class ResourcePackToolkit : IPackToolkit<ResourcePack>
 	{
 		return await ValueTask.FromResult((from pack in Paths.Select(delegate(string path)
 			{
-				string text = ResourcePacksDirectory + "/" + Path.GetFileName(path);
-				if (File.Exists(text))
+                string text = Path.Combine(ResourcePacksDirectory, Path.GetFileName(path));
+                if (File.Exists(text))
 				{
 					return null;
 				}
@@ -145,14 +145,13 @@ public class ResourcePackToolkit : IPackToolkit<ResourcePack>
 		}
 		else
 		{
-			string infoFile = path + "/pack.mcmeta";
-			if (!File.Exists(infoFile))
-			{
+			string infoFile = Path.Combine(path, "pack.mcmeta");
+			if (!File.Exists(infoFile)) {			
 				return null;
 			}
 			using FileStream infoStream = File.OpenRead(infoFile);
 			infoStream.CopyTo(infoMemStream);
-			string imgFile = path + "/pack.png";
+			string imgFile = Path.Combine(path, "pack.png");
 			if (File.Exists(imgFile))
 			{
 				using FileStream imgStream = File.OpenRead(imgFile);
@@ -180,7 +179,7 @@ public class ResourcePackToolkit : IPackToolkit<ResourcePack>
 
 	public bool EnabledResourcePacks(IEnumerable<ResourcePack> enabledPacks)
 	{
-		string optionsPath = (WorkingDirectory.EndsWith('/') ? WorkingDirectory : (WorkingDirectory + "\\options.txt"));
+		string optionsPath = (WorkingDirectory.EndsWith('/') ? WorkingDirectory : Path.Combine(WorkingDirectory, "options.txt"));
 		string options = ((!File.Exists(optionsPath)) ? "resourcePacks:[]" : File.ReadAllText(optionsPath, Encoding.Default));
 		string enabledPackIDs = string.Join(",", from pack in enabledPacks.Reverse()
 			select (!IsNewOptionFormat) ? ("\"" + pack.Id + "\"") : ("\"file/" + pack.Id + "\""));
@@ -189,38 +188,13 @@ public class ResourcePackToolkit : IPackToolkit<ResourcePack>
 		return true;
 	}
 
-	public static string GetVersionFolder(string root, string id)
-	{
-		return $"{root}{X}versions{X}{id}";
-	}
-
-	public ResourcePackToolkit(GameCore? Id, bool isEnabled, bool Isolate, string workingDirectory)
+	public ResourcePackToolkit(GameCore? Id, bool isEnabled, bool Isolate = true)
 	{
 		GameCore = Id;
 		IsCopy = true;
 		IsOlate = Isolate;
 		IsEnabled = isEnabled;
-		ResourcePacksDirectory = (Isolate ? (workingDirectory + "\\versions\\" + Id.Id + "\\resourcepacks") : (workingDirectory + "\\resourcepacks"));
-		WorkingDirectory = workingDirectory + "\\versions\\" + Id.Id;
-	}
-
-	public ResourcePackToolkit(GameCore? Id, bool isEnabled, string workingDirectory)
-	{
-		GameCore = Id;
-		IsCopy = true;
-		IsOlate = true;
-		IsEnabled = isEnabled;
-		ResourcePacksDirectory = workingDirectory + "\\versions\\" + Id.Id + "\\resourcepacks";
-		WorkingDirectory = workingDirectory + "\\versions\\" + Id.Id;
-	}
-
-	public ResourcePackToolkit(GameCore? Id, string workingDirectory)
-	{
-		GameCore = Id;
-		IsCopy = true;
-		IsOlate = true;
-		IsEnabled = true;
-		ResourcePacksDirectory = workingDirectory + "\\versions\\" + Id.Id + "\\resourcepacks";
-		WorkingDirectory = workingDirectory + "\\versions\\" + Id.Id;
+		ResourcePacksDirectory = Id.GetResourcePacksPath(Isolate);
+		WorkingDirectory = Id.GetGameCorePath();
 	}
 }

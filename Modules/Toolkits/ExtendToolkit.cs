@@ -9,6 +9,7 @@ using MinecraftLaunch.Modules.Enum;
 using MinecraftLaunch.Modules.Installer;
 using MinecraftLaunch.Modules.Interface;
 using MinecraftLaunch.Modules.Models.Download;
+using MinecraftLaunch.Modules.Models.Launch;
 using Natsurainko.Toolkits.Network;
 using Natsurainko.Toolkits.Network.Model;
 using Newtonsoft.Json;
@@ -227,4 +228,12 @@ public static class ExtendToolkit
 	public static DirectoryInfo[] FindAllDirectory(this string path) => Directory.GetDirectories(path).Select(x => new DirectoryInfo(x)).ToArray();
 
     public static FileInfo[] FindAllFile(this string path) => Directory.GetFiles(path).Select(x => new FileInfo(x)).ToArray();
+
+    public static string GetVersionsPath(this GameCore row) => Path.Combine(row.Root!.FullName, "versions");
+
+    public static string GetModsPath(this GameCore row, bool Isolate = true) => Path.Combine(row.Root!.FullName, Isolate ? Path.Combine("versions", row.Id) : "", "mods");
+
+	public static string GetGameCorePath(this GameCore row, bool Isolate = true) => Path.Combine(row.GetVersionsPath(), row.Id!);
+
+    public static string GetResourcePacksPath(this GameCore row, bool Isolate = true) => Path.Combine(row.Root!.FullName, Isolate ? Path.Combine("versions", row.Id) : "", "resourcepacks");
 }

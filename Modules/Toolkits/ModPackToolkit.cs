@@ -33,11 +33,11 @@ public class ModPackToolkit : IPackToolkit<ModPack>
 		List<ModPack> modPacks = new List<ModPack>();
 		Directory.CreateDirectory(ModPacksDirectory);
 		FileInfo[] files = new DirectoryInfo(ModPacksDirectory).GetFiles();
-		foreach (FileInfo file in files)
-		{
+		foreach (FileInfo file in files) {		
 			ModPack v = LoadSingle(file.FullName);
 			modPacks.Add(v);
 		}
+
 		return await Task.FromResult(modPacks.ToImmutableArray());
 	}
 
@@ -45,31 +45,28 @@ public class ModPackToolkit : IPackToolkit<ModPack>
 	{
 		return await Task.FromResult((from mod in paths.Select(delegate(string path)
 			{
-				string text = ModPacksDirectory + "/" + Path.GetFileName(path);
-				if (File.Exists(text))
-				{
+				string text = Path.Combine(ModPacksDirectory, Path.GetFileName(path));
+				if (File.Exists(text)) { 				
 					return null;
 				}
+
 				ModPack modPack = LoadSingle(path);
-				if (modPack == null)
-				{
+				if (modPack == null) {				
 					return null;
 				}
-				try
-				{
-					if (IsCopy)
-					{
+
+				try {				
+					if (IsCopy) {					
 						File.Copy(path, text);
 					}
-					else
-					{
+					else {					
 						File.Move(path, text);
 					}
 				}
-				catch (IOException)
-				{
+				catch (IOException) {				
 					return null;
 				}
+
 				modPack.Path = text;
 				return modPack;
 			})
@@ -173,30 +170,21 @@ public class ModPackToolkit : IPackToolkit<ModPack>
 		};
 	}
 
-	public ModPackToolkit(GameCore? Id, bool isEnabled, bool Isolate, string workingDirectory)
+	public ModPackToolkit(GameCore? Id, bool Isolate)
 	{
 		GameCore = Id;
 		IsCopy = true;
 		IsOlate = Isolate;
-		ModPacksDirectory = (Isolate ? (workingDirectory + "\\versions\\" + Id.Id + "\\mods") : (workingDirectory + "\\mods"));
-		WorkingDirectory = workingDirectory + "\\versions\\" + Id.Id;
+		ModPacksDirectory = Id.GetModsPath(Isolate);
+		WorkingDirectory = Id.GetGameCorePath();
 	}
 
-	public ModPackToolkit(GameCore? Id, bool isEnabled, string workingDirectory)
+	public ModPackToolkit(GameCore? Id)
 	{
 		GameCore = Id;
 		IsCopy = true;
 		IsOlate = true;
-		ModPacksDirectory = workingDirectory + "\\versions\\" + Id.Id + "\\mods";
-		WorkingDirectory = workingDirectory + "\\versions\\" + Id.Id;
-	}
-
-	public ModPackToolkit(GameCore? Id, string workingDirectory)
-	{
-		GameCore = Id;
-		IsCopy = true;
-		IsOlate = true;
-		ModPacksDirectory = workingDirectory + "\\versions\\" + Id.Id + "\\mods";
-		WorkingDirectory = workingDirectory + "\\versions\\" + Id.Id;
-	}
+        ModPacksDirectory = Id.GetModsPath(false);
+        WorkingDirectory = Id.GetGameCorePath();
+    }
 }

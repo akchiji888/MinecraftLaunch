@@ -327,5 +327,5 @@ public class GameCoreToolkit
 
     public static implicit operator GameCoreToolkit(DirectoryInfo path) => new GameCoreToolkit(path);
 
-    public static implicit operator GameCoreToolkit(GameCore path) => new GameCoreToolkit(path.Root);
+    public static implicit operator GameCoreToolkit(GameCore path) => new GameCoreToolkit(path.Root!);
 }

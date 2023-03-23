@@ -31,20 +31,27 @@ public class ResourceInstaller
         var progress = new Progress<(string, float)>();
         var root = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         void Progress_ProgressChanged(object _, (string, float) e) => func(e.Item1, e.Item2);
-
+        
         progress.ProgressChanged += Progress_ProgressChanged;
-
+        
         var clientFile = GetFileResources()?.FirstOrDefault();
         if (clientFile != null) {
-            var request = clientFile.ToDownloadRequest();
+            var request = clientFile.ToDownloadRequest();                           
             if (!request.Directory.Exists) {
                 request.Directory.Create();
-
-                var httpDownloadResponse = await HttpWrapper.HttpDownloadAsync(request);
-                if (httpDownloadResponse.HttpStatusCode != HttpStatusCode.OK) {
-                    FailedResources.Add(clientFile);
-                }
             }
+
+            if (APIManager.Current != APIManager.Mojang) {
+                request.Url = $"{APIManager.Current.Host}/version/{clientFile.Name}/client";
+            }
+
+            var httpDownloadResponse = await HttpWrapper.HttpDownloadAsync(request, (e, x) =>
+            {
+                Console.WriteLine(x);
+            });
+            if (httpDownloadResponse.HttpStatusCode != HttpStatusCode.OK) {
+                FailedResources.Add(clientFile);
+            }            
         }
 
         var manyBlock = new TransformManyBlock<List<IResource>, IResource>(x => x.Where(x =>
@@ -60,8 +67,7 @@ public class ResourceInstaller
             return true;
         }));
 
-        int post = 0;
-        int output = 0;
+        int post = 0, output = 0;
 
         var actionBlock = new ActionBlock<IResource>(async resource =>
         {
@@ -76,7 +82,7 @@ public class ResourceInstaller
                 var info = request.Directory.FullName.Substring(request.Directory.FullName.IndexOf(".minecraft"));
                 var text = Path.Combine(root, info, request.FileName);
                 //先尝试使用缓存，不行就下一遍
-                if (File.Exists(text)) {               
+                if (File.Exists(text) && !resource.ToFileInfo().Exists) {               
                     File.Copy(text, Path.Combine(request.Directory.FullName, request.FileName), true);
                 }
                 else if (!resource.ToFileInfo().Exists)//缓存和实际目录都没有此依赖的情况
@@ -111,8 +117,8 @@ public class ResourceInstaller
         });
         var disposable = manyBlock.LinkTo(actionBlock, new DataflowLinkOptions { PropagateCompletion = true });
 
-        manyBlock.Post(this.GameCore.LibraryResources!.Where(x => x.IsEnable).Select(x => (IResource)x).ToList());
-        manyBlock.Post(await this.GetAssetResourcesAsync());
+        manyBlock.Post(this.GameCore.LibraryResources!.Where(x => x.IsEnable && !x.ToFileInfo().Exists).Select(x => (IResource)x).ToList());
+        manyBlock.Post((await this.GetAssetResourcesAsync()).Where(x => !x.ToFileInfo().Exists).ToList());
 
         manyBlock.Complete();
 
@@ -121,8 +127,7 @@ public class ResourceInstaller
 
         GC.Collect();
 
-
-        progress.ProgressChanged -= Progress_ProgressChanged;
+        progress.ProgressChanged -= Progress_ProgressChanged!;
 
         return new ResourceInstallResponse
         {
@@ -139,17 +144,21 @@ public class ResourceInstaller
     }
 
     public async ValueTask<List<IResource>> GetAssetResourcesAsync()
-	{
-		if (!FileExtension.Verify(GameCore.AssetIndexFile.FileInfo, GameCore.AssetIndexFile.Size) && !FileExtension.Verify(GameCore.AssetIndexFile.FileInfo, GameCore.AssetIndexFile.CheckSum))
-		{
-			HttpDownloadRequest httpDownloadRequest = GameCore.AssetIndexFile.ToDownloadRequest();
-			if (!httpDownloadRequest.Directory.Exists)
-			{
-				httpDownloadRequest.Directory.Create();
-			}
-			await HttpToolkit.HttpDownloadAsync(httpDownloadRequest);
-		}
-		return new AssetParser(new AssetJsonEntity().FromJson(await File.ReadAllTextAsync(GameCore.AssetIndexFile.ToFileInfo().FullName)), GameCore.Root).GetAssets().Select((Func<AssetResource, IResource>)((AssetResource x) => x)).ToList();
+    {
+        if (!(GameCore.AssetIndexFile!.FileInfo.Verify(GameCore.AssetIndexFile.Size) || GameCore.AssetIndexFile.FileInfo.Verify(GameCore.AssetIndexFile.CheckSum))) {   
+                
+            var request = this.GameCore.AssetIndexFile.ToDownloadRequest();
+
+            if (!request.Directory.Exists)
+                request.Directory.Create();
+
+            var res = await HttpWrapper.HttpDownloadAsync(request);
+        }
+
+        var entity = new AssetJsonEntity();
+        entity = entity.FromJson(await File.ReadAllTextAsync(this.GameCore.AssetIndexFile?.ToFileInfo()!.FullName!));
+
+        return new AssetParser(entity, this.GameCore.Root!).GetAssets().Select(x => (IResource)x).ToList();
 	}
 
 	public async static ValueTask<List<IResource>> GetAssetFilesAsync(GameCore core)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace MinecraftLaunch.Modules.Toolkits;
 
@@ -45,4 +46,34 @@ public class CryptoToolkit
 		}
 		return data;
 	}
+
+    public static string DecrytOfKaiser(string encrytedData, int key = 1) {   
+        char[] chars = encrytedData.ToCharArray();
+        StringBuilder sb = new StringBuilder();
+        foreach (char c in chars) {       
+            int asciiCode = c;
+            asciiCode -= key;
+            char result = (char)asciiCode;
+            sb.Append(result);
+        }
+        return sb.ToString();
+    }
+    
+	/// <summary>
+	/// º”√‹ -ø≠»ˆ√‹¬Î
+	/// </summary>
+	/// <param name="orinal"></param>
+	/// <param name="key"></param>
+	/// <returns></returns>
+    public static string EncrytoOfKaiser(string orinal, int key = 1) {   
+        char[] chars = orinal.ToCharArray();
+        StringBuilder sb = new StringBuilder();
+        foreach (char c in chars) {       
+            int asciiCode = c;
+            asciiCode += key;
+            char result = (char)asciiCode;
+            sb.Append(result);
+        }
+        return sb.ToString();
+    }
 }
