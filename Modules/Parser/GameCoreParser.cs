@@ -257,15 +257,15 @@ public class GameCoreParser
 	private IEnumerable<string> HandleArgumentsGame(ArgumentsJsonEntity entity)
 	{
 		return ArgumnetsGroup(from x in entity.Game
-			where (int)x.Type == 8
-			select ((object)x).ToString().ToPath());
+			where x is string
+			select x.ToString().ToPath());
 	}
 
 	private IEnumerable<string> HandleArgumentsJvm(ArgumentsJsonEntity entity)
 	{
 		return ArgumnetsGroup(from x in entity.Jvm
-			where (int)x.Type == 8
-			select ((object)x).ToString().ToPath());
+			where x is string
+			select x.ToString().ToPath());
 	}
 
 	private static IEnumerable<string> ArgumnetsGroup(IEnumerable<string> vs)

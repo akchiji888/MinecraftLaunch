@@ -20,12 +20,9 @@ public class GameCore
 
 	public IEnumerable<ModLoaderInfo> ModLoaderInfos { get; set; } = new ModLoaderInfo[0];
 
-
 	public IEnumerable<string> FrontArguments { get; set; } = new string[0];
 
-
 	public IEnumerable<string> BehindArguments { get; set; } = new string[0];
-
 
 	public string? Id { get; set; }
 
@@ -38,4 +35,8 @@ public class GameCore
 	public string? Source { get; set; }
 
 	public bool HasModLoader { get; set; }
+
+    public override bool Equals(object? obj) {   
+        return (obj as GameCore)!.Id!.Equals(Id);
+    }
 }

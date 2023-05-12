@@ -1,10 +1,9 @@
 using System;
 using MinecraftLaunch.Modules.Enum;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace MinecraftLaunch.Modules.Models.Auth;
 
-[JsonConverter(typeof(ConvertAccountJson))]
 public abstract class Account
 {
 	public string Name { get; set; }

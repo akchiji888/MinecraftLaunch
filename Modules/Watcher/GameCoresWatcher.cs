@@ -43,10 +43,8 @@ namespace MinecraftLaunch.Modules.Watcher
         }
     }
 
-    public class GameCoresChangedArgs
-    {
-        public GameCoresChangedArgs(WatcherChangeTypes types,string id)
-        {
+    public class GameCoresChangedArgs {
+        public GameCoresChangedArgs(WatcherChangeTypes types,string id) {
             ChangeType= types;
             GameCoreId= id;
         }

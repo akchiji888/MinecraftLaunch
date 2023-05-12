@@ -12,8 +12,9 @@ using MinecraftLaunch.Modules.Models.Download;
 using MinecraftLaunch.Modules.Models.Launch;
 using Natsurainko.Toolkits.Network;
 using Natsurainko.Toolkits.Network.Model;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using Newtonsoft.Json.Serialization;
+using System.Text.Json;
 
 namespace MinecraftLaunch.Modules.Toolkits;
 
@@ -80,55 +81,34 @@ public static class ExtendToolkit
 
 	public static T ToJsonEntity<T>(this T entity, string json) where T : IJsonEntity
 	{
-		return JsonConvert.DeserializeObject<T>(json);
-	}
+        return JsonSerializer.Deserialize<T>(json)!;
+    }
 
-	public static string ToJson<T>(this T entity) where T : IJsonEntity
-	{
-		//IL_0006: Unknown result type (might be due to invalid IL or missing references)
-		//IL_000b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_000c: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0016: Expected O, but got Unknown
-		//IL_0016: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0029: Expected O, but got Unknown
-		return JsonConvert.SerializeObject((object)entity, new JsonSerializerSettings
-		{
-			ContractResolver = (IContractResolver)new CamelCasePropertyNamesContractResolver(),
-			Formatting = (Formatting)1,
-			NullValueHandling = (NullValueHandling)1
+    public static string ToJson<T>(this T entity) where T : IJsonEntity {	
+        return JsonSerializer.Serialize((object)entity, options: new JsonSerializerOptions {		
+			WriteIndented = true
 		});
 	}
 
-	public static string ToJson(this object entity, bool IsIndented = true)
+	public static string ToJson(this object entity, bool IsIndented = true) {
 	{
-		//IL_0004: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0009: Unknown result type (might be due to invalid IL or missing references)
-		//IL_000a: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0014: Expected O, but got Unknown
-		//IL_0014: Unknown result type (might be due to invalid IL or missing references)
-		//IL_001b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0027: Expected O, but got Unknown
-		if (IsIndented)
-		{
-			return JsonConvert.SerializeObject(entity, new JsonSerializerSettings
-			{
-				ContractResolver = (IContractResolver)new CamelCasePropertyNamesContractResolver(),
-				Formatting = (Formatting)1,
-				NullValueHandling = (NullValueHandling)1
-			});
-		}
-		return JsonConvert.SerializeObject(entity);
+		if (IsIndented)		
+			return JsonSerializer.Serialize(entity, options: new JsonSerializerOptions {    
+				WriteIndented = true
+            });
+        }
+
+		return JsonSerializer.Serialize(entity);
 	}
 
 	public static T FromJson<T>(this T entity, string json) where T : IJsonEntity
 	{
-		return JsonConvert.DeserializeObject<T>(json);
-	}
+        return JsonSerializer.Deserialize<T>(json)!;
+    }
 
-	public static T ToJsonEntity<T>(this string json)
+    public static T ToJsonEntity<T>(this string json)
 	{
-		return JsonConvert.DeserializeObject<T>(json);
+		return JsonSerializer.Deserialize<T>(json)!;
 	}
 
 	public static string ToDownloadLink(this OpenJdkType open, JdkDownloadSource jdkDownloadSource)

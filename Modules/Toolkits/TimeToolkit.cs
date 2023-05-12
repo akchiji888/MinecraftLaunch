@@ -8,7 +8,9 @@ public class TimeToolkit
 
 	public static int WorldYear => DateTime.UtcNow.Year;
 
-	public static bool IsLeapYear
+	public const string TimeFormat = @"yyyy\-MM\-dd hh\:mm";
+
+    public static bool IsLeapYear
 	{
 		get
 		{

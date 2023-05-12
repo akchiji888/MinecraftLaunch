@@ -124,8 +124,8 @@ public class ResourcePackToolkit : IPackToolkit<ResourcePack>
 	{
 		string id = Path.GetFileName(path);
 		bool isZip = path.EndsWith(".zip");
-		using MemoryStream infoMemStream = new MemoryStream();
-		using MemoryStream imgMemStream = new MemoryStream();
+	 MemoryStream infoMemStream = new MemoryStream();
+	    MemoryStream imgMemStream = new MemoryStream();
 		if (isZip)
 		{
 			using ZipArchive archive = ZipFile.OpenRead(path);
@@ -134,12 +134,12 @@ public class ResourcePackToolkit : IPackToolkit<ResourcePack>
 			{
 				return null;
 			}
-			using Stream stream = infoEntry.Open();
+		    Stream stream = infoEntry.Open();
 			stream.CopyTo(infoMemStream);
 			ZipArchiveEntry imgEntry = archive.GetEntry("pack.png");
 			if (imgEntry != null)
 			{
-				using Stream stream2 = imgEntry.Open();
+			    Stream stream2 = imgEntry.Open();
 				stream2.CopyTo(imgMemStream);
 			}
 		}
@@ -149,12 +149,12 @@ public class ResourcePackToolkit : IPackToolkit<ResourcePack>
 			if (!File.Exists(infoFile)) {			
 				return null;
 			}
-			using FileStream infoStream = File.OpenRead(infoFile);
+		    FileStream infoStream = File.OpenRead(infoFile);
 			infoStream.CopyTo(infoMemStream);
 			string imgFile = Path.Combine(path, "pack.png");
 			if (File.Exists(imgFile))
 			{
-				using FileStream imgStream = File.OpenRead(imgFile);
+		        FileStream imgStream = File.OpenRead(imgFile);
 				imgStream.CopyTo(imgMemStream);
 			}
 		}

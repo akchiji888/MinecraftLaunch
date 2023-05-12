@@ -32,7 +32,7 @@ public class ResourceInstaller
         var root = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         void Progress_ProgressChanged(object _, (string, float) e) => func(e.Item1, e.Item2);
         
-        progress.ProgressChanged += Progress_ProgressChanged;
+        progress.ProgressChanged += Progress_ProgressChanged!;
         
         var clientFile = GetFileResources()?.FirstOrDefault();
         if (clientFile != null) {
@@ -42,13 +42,10 @@ public class ResourceInstaller
             }
 
             if (APIManager.Current != APIManager.Mojang) {
-                request.Url = $"{APIManager.Current.Host}/version/{clientFile.Name}/client";
+                request.Url = $"{APIManager.Current.Host}/version/{Path.GetFileNameWithoutExtension(clientFile.Name)}/client";
             }
 
-            var httpDownloadResponse = await HttpWrapper.HttpDownloadAsync(request, (e, x) =>
-            {
-                Console.WriteLine(x);
-            });
+            var httpDownloadResponse = await HttpWrapper.HttpDownloadAsync(request);
             if (httpDownloadResponse.HttpStatusCode != HttpStatusCode.OK) {
                 FailedResources.Add(clientFile);
             }            

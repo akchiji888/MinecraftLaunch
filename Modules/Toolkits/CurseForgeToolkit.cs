@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 using MinecraftLaunch.Modules.Enum;
 using MinecraftLaunch.Modules.Models.Download;
 using Natsurainko.Toolkits.Network;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace MinecraftLaunch.Modules.Toolkits
 {
@@ -22,33 +23,8 @@ namespace MinecraftLaunch.Modules.Toolkits
         /// <param name="gameVersion"></param>
         /// <param name="category"></param>
         /// <returns></returns>
-        public async ValueTask<List<CurseForgeModpack>> SearchModpackAsync(string searchFilter, ModLoaderType modLoaderType = ModLoaderType.Any, string gameVersion = null, int category = -1)
-        {
-            var builder = new StringBuilder(API)
-                .Append($"/search?gameId=432")
-                .Append(string.IsNullOrEmpty(searchFilter) ? string.Empty : $"&searchFilter={searchFilter}")
-                .Append($"&modLoaderType={(int)modLoaderType}")
-                .Append(string.IsNullOrEmpty(gameVersion) ? string.Empty : $"&gameVersion={gameVersion}")
-                .Append(category == -1 ? string.Empty : $"&categoryId={gameVersion}")
-                .Append("&sortField=Featured&sortOrder=desc&classId=6");
-
-            var result = new List<CurseForgeModpack>();
-
-            try
-            {
-                using var responseMessage = await HttpWrapper.HttpGetAsync(builder.ToString(), Headers);
-                responseMessage.EnsureSuccessStatusCode();
-
-                var entity = JObject.Parse(await responseMessage.Content.ReadAsStringAsync());
-                ((JArray)entity["data"]).ToList().ForEach(x => result.Add(ParseCurseForgeModpack((JObject)x)));
-
-                result.Sort((a, b) => a.GamePopularityRank.CompareTo(b.GamePopularityRank));
-
-                return result;
-            }
-            catch { }
-
-            return null;
+        public async ValueTask<List<CurseForgeModpack>> SearchModpackAsync(string searchFilter, ModLoaderType modLoaderType = ModLoaderType.Any, string gameVersion = null, int category = -1) {
+            return await SearchResourceAsync(searchFilter, 6, modLoaderType, gameVersion, category);
         }
 
         /// <summary>
@@ -59,33 +35,8 @@ namespace MinecraftLaunch.Modules.Toolkits
         /// <param name="gameVersion"></param>
         /// <param name="category"></param>
         /// <returns></returns>
-        public async ValueTask<List<CurseForgeModpack>> SearchModpacksAsync(string searchFilter, ModLoaderType modLoaderType = ModLoaderType.Any, string gameVersion = null, int category = -1)
-        {
-            var builder = new StringBuilder(API)
-                .Append($"/search?gameId=432")
-                .Append(string.IsNullOrEmpty(searchFilter) ? string.Empty : $"&searchFilter={searchFilter}")
-                .Append($"&modLoaderType={(int)modLoaderType}")
-                .Append(string.IsNullOrEmpty(gameVersion) ? string.Empty : $"&gameVersion={gameVersion}")
-                .Append(category == -1 ? string.Empty : $"&categoryId={gameVersion}")
-                .Append("&sortField=Featured&sortOrder=desc&classId=4471");
-
-            var result = new List<CurseForgeModpack>();
-
-            try
-            {
-                using var responseMessage = await HttpWrapper.HttpGetAsync(builder.ToString(), Headers);
-                responseMessage.EnsureSuccessStatusCode();
-
-                var entity = JObject.Parse(await responseMessage.Content.ReadAsStringAsync());
-                ((JArray)entity["data"]).ToList().ForEach(x => result.Add(ParseCurseForgeModpack((JObject)x)));
-
-                result.Sort((a, b) => a.GamePopularityRank.CompareTo(b.GamePopularityRank));
-
-                return result;
-            }
-            catch { }
-
-            return null;
+        public async ValueTask<List<CurseForgeModpack>> SearchModpacksAsync(string searchFilter, ModLoaderType modLoaderType = ModLoaderType.Any, string gameVersion = null, int category = -1) {
+            return await SearchResourceAsync(searchFilter, 4471, modLoaderType, gameVersion, category);
         }
 
         /// <summary>
@@ -96,32 +47,8 @@ namespace MinecraftLaunch.Modules.Toolkits
         /// <param name="gameVersion"></param>
         /// <param name="category"></param>
         /// <returns></returns>
-        public async ValueTask<List<CurseForgeModpack>> SearchResourcePackAsync(string searchFilter, string gameVersion = null, int category = -1)
-        {
-            var builder = new StringBuilder(API)
-                .Append($"/search?gameId=432")
-                .Append(string.IsNullOrEmpty(searchFilter) ? string.Empty : $"&searchFilter={searchFilter}")
-                .Append(string.IsNullOrEmpty(gameVersion) ? string.Empty : $"&gameVersion={gameVersion}")
-                .Append(category == -1 ? string.Empty : $"&categoryId={gameVersion}")
-                .Append("&sortField=Featured&sortOrder=desc&classId=12");
-
-            var result = new List<CurseForgeModpack>();
-
-            try
-            {
-                using var responseMessage = await HttpWrapper.HttpGetAsync(builder.ToString(), Headers);
-                responseMessage.EnsureSuccessStatusCode();
-
-                var entity = JObject.Parse(await responseMessage.Content.ReadAsStringAsync());
-                ((JArray)entity["data"]).ToList().ForEach(x => result.Add(ParseCurseForgeModpack((JObject)x)));
-
-                result.Sort((a, b) => a.GamePopularityRank.CompareTo(b.GamePopularityRank));
-
-                return result;
-            }
-            catch { }
-
-            return null;
+        public async ValueTask<List<CurseForgeModpack>> SearchResourcePackAsync(string searchFilter, string gameVersion = null, int category = -1) {
+            return await SearchResourceAsync(searchFilter, 12, ModLoaderType.Unknown, gameVersion, category);
         }
 
         /// <summary>
@@ -132,24 +59,38 @@ namespace MinecraftLaunch.Modules.Toolkits
         /// <param name="gameVersion"></param>
         /// <param name="category"></param>
         /// <returns></returns>
-        public async ValueTask<List<CurseForgeModpack>> SearchGameMapAsync(string searchFilter, string gameVersion = null, int category = -1)
-        {
-            var builder = new StringBuilder(API)
-                .Append($"/search?gameId=432")
-                .Append(string.IsNullOrEmpty(searchFilter) ? string.Empty : $"&searchFilter={searchFilter}")
-                .Append(string.IsNullOrEmpty(gameVersion) ? string.Empty : $"&gameVersion={gameVersion}")
-                .Append(category == -1 ? string.Empty : $"&categoryId={gameVersion}")
-                .Append("&sortField=Featured&sortOrder=desc&classId=17");
+        public async ValueTask<List<CurseForgeModpack>> SearchGameMapAsync(string searchFilter, string gameVersion = null, int category = -1) {       
+            return await SearchResourceAsync(searchFilter, 17, ModLoaderType.Unknown, gameVersion, category);
+        }
 
+        /// <summary>
+        /// 获取热门资源方法
+        /// </summary>
+        /// <returns></returns>
+        public async ValueTask<List<CurseForgeModpack>> GetFeaturedsAsync()
+        {
             var result = new List<CurseForgeModpack>();
 
-            try
-            {
-                using var responseMessage = await HttpWrapper.HttpGetAsync(builder.ToString(), Headers);
+            var content = new JObject {           
+                { "gameId", 432 },
+                { "excludedModIds", JToken.FromObject(new int[] { 0 }) },
+                { "gameVersionTypeId", null }
+            };
+
+            try {           
+                using var responseMessage = await HttpWrapper.HttpPostAsync($"{API}/featured", content.ToString(), Headers);
                 responseMessage.EnsureSuccessStatusCode();
-                
+
                 var entity = JObject.Parse(await responseMessage.Content.ReadAsStringAsync());
-                ((JArray)entity["data"]).ToList().ForEach(x => result.Add(ParseCurseForgeModpack((JObject)x)));
+                await Console.Out.WriteLineAsync(await responseMessage.Content.ReadAsStringAsync());
+                foreach (JObject jObject in ((JArray)entity["data"]["popular"]).Cast<JObject>())
+                    result.Add(ParseCurseForgeModpack(jObject));
+
+                foreach (JObject jObject in ((JArray)entity["data"]["recentlyUpdated"]).Cast<JObject>())
+                    result.Add(ParseCurseForgeModpack(jObject));
+
+                foreach (JObject jObject in ((JArray)entity["data"]["featured"]).Cast<JObject>())
+                    result.Add(ParseCurseForgeModpack(jObject));
 
                 result.Sort((a, b) => a.GamePopularityRank.CompareTo(b.GamePopularityRank));
 
@@ -161,16 +102,28 @@ namespace MinecraftLaunch.Modules.Toolkits
         }
 
         /// <summary>
-        /// 获取热门模组方法
+        /// 资源基础搜索方法
         /// </summary>
+        /// <remarks>
+        /// 所有的搜索方法都会直接使用此方法
+        /// </remarks>
         /// <returns></returns>
-        public async ValueTask<List<CurseForgeModpack>> GetFeaturedModpacksAsync()
-        {
-            List<CurseForgeModpack> result = new List<CurseForgeModpack>();
+        public async ValueTask<List<CurseForgeModpack>> SearchResourceAsync(string searchFilter, int classId, ModLoaderType modLoaderType = ModLoaderType.Any, string gameVersion = null, int category = -1) {
+            var builder = new StringBuilder(API)
+                          .Append($"/search?gameId=432")
+                          .Append(string.IsNullOrEmpty(searchFilter) ? string.Empty : $"&searchFilter={searchFilter}")
+                          .Append((int)modLoaderType == 8 ? $"&modLoaderType={(int)modLoaderType}" : string.Empty)
+                          .Append(string.IsNullOrEmpty(gameVersion) ? string.Empty : $"&gameVersion={gameVersion}")
+                          .Append(category == -1 ? string.Empty : $"&categoryId={gameVersion}")
+                          .Append($"&sortField=Featured&sortOrder=desc&classId={classId}");
+
+            var result = new List<CurseForgeModpack>();
+
             try
             {
-                using HttpResponseMessage responseMessage = await HttpWrapper.HttpGetAsync("https://api.curseforge.com/v1/mods/search?gameId=432&modLoaderType=0&sortField=Featured&sortOrder=desc&classId=6", Headers, HttpCompletionOption.ResponseContentRead);
+                using var responseMessage = await HttpWrapper.HttpGetAsync(builder.ToString(), Headers);
                 responseMessage.EnsureSuccessStatusCode();
+
                 var entity = JObject.Parse(await responseMessage.Content.ReadAsStringAsync());
                 ((JArray)entity["data"]).ToList().ForEach(x => result.Add(ParseCurseForgeModpack((JObject)x)));
 
@@ -178,11 +131,10 @@ namespace MinecraftLaunch.Modules.Toolkits
 
                 return result;
             }
-            catch
-            {
-            }
+            catch { }
 
             return null;
+
         }
 
         /// <summary>
@@ -195,7 +147,7 @@ namespace MinecraftLaunch.Modules.Toolkits
         {
             string reqUrl = $"{API}/{addonId}/files/{fileId}/download-url";
             using HttpResponseMessage res = await HttpWrapper.HttpGetAsync(reqUrl, Headers);
-            return JsonConvert.DeserializeObject<DataModel<string>>(await res.Content.ReadAsStringAsync())?.Data!;
+            return JsonSerializer.Deserialize<DataModel<string>>(await res.Content.ReadAsStringAsync())?.Data!;
         }
 
         public async ValueTask<List<CurseForgeModpackCategory>> GetCategories()
