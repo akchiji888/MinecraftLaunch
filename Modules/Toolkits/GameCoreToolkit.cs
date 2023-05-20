@@ -29,7 +29,10 @@ public class GameCoreToolkit
 				}
 			}
 			File.WriteAllText(gamejson.FullName, entity.ToJson());
-			File.Move(gameJar.FullName, Path.Combine(Root.FullName, "versions", oldid, newid + ".jar"));
+			if(Path.Combine(Root.FullName,oldid,newid + ".jar").IsFile())
+                    	{
+                        	File.Move(fileInfo2.FullName, Path.Combine(Root.FullName, "versions", oldid, newid + ".jar"));
+                    	}
 			File.Move(gamejson.FullName, Path.Combine(Root.FullName, "versions", oldid, newid + ".json"));
 			Directory.Move(gameFolder.FullName, Path.Combine(Root.FullName, "versions", newid));
 		}
@@ -101,14 +104,14 @@ public class GameCoreToolkit
 		var gameCores = GetGameCores();
 		var endCores = new List<GameCore>();
 
-		var firstScearh = gameCores.Where(x => x.Id!.ToLower().Contains(text.ToLower()));//±ê×¼É¸²é -1
+		var firstScearh = gameCores.Where(x => x.Id!.ToLower().Contains(text.ToLower()));//æ ‡å‡†ç­›æŸ¥ -1
 
 		if (!firstScearh.Any()) {			
-			endCores.AddRange(PolymerizeScearh(text, gameCores) ?? new List<GameCore>());//Ìõ¼şÉ¸²é -2
+			endCores.AddRange(PolymerizeScearh(text, gameCores) ?? new List<GameCore>());//æ¡ä»¶ç­›æŸ¥ -2
 		} else endCores.AddRange(firstScearh);
 
-		if (!endCores.Any()) {//Æ´ÒôÉ¸²é -3 End	
-			endCores.AddRange(gameCores.Where(x =>//È«Æ´É¸²é
+		if (!endCores.Any()) {//æ‹¼éŸ³ç­›æŸ¥ -3 End	
+			endCores.AddRange(gameCores.Where(x =>//å…¨æ‹¼ç­›æŸ¥
 			{			
 				try {
 					var spell = StringToolkit.GetSpell(x.Id!).ToLower();
@@ -124,13 +127,13 @@ public class GameCoreToolkit
 				return false;
 			}));
 
-			endCores.AddRange(gameCores.Where(x =>//Ê××ÖÄ¸É¸²é
+			endCores.AddRange(gameCores.Where(x =>//é¦–å­—æ¯ç­›æŸ¥
 			{
 				try {
                     var firstspell = StringToolkit.GetFirstSpell(x.Id!).ToLower();
 
                     if (firstspell.Contains(text.ToLower())) {
-						foreach(var c in endCores) { //mlgb£¬Óë±ê×¼É¸²é³åÍ»ÁË£¬ÊÖ¶¯¼ì²âÊÇ·ñÓĞÏàÍ¬µÄÓÎÏ·ºËĞÄ
+						foreach(var c in endCores) { //mlgbï¼Œä¸æ ‡å‡†ç­›æŸ¥å†²çªäº†ï¼Œæ‰‹åŠ¨æ£€æµ‹æ˜¯å¦æœ‰ç›¸åŒçš„æ¸¸æˆæ ¸å¿ƒ
 							if (c.Id!.ToLower() == firstspell) {
 								return false;
 							}
@@ -252,7 +255,7 @@ public class GameCoreToolkit
 	internal IEnumerable<GameCore> PolymerizeScearh(string text, IEnumerable<GameCore> cores) {
         var endCores = new List<GameCore>();
 
-        if (text.StartsWith("-v")) {//Í¨¹ı°æ±¾ËÑË÷		
+        if (text.StartsWith("-v")) {//é€šè¿‡ç‰ˆæœ¬æœç´¢		
 			var condition = text.Replace("-v", "").TrimStart().ToLower();
 			
             endCores.AddRange(cores.Where(x =>
@@ -269,7 +272,7 @@ public class GameCoreToolkit
 			}));
 		}
 
-		if (text.StartsWith("-l")) {//Í¨¹ıÄ£×é¼ÓÔØÆ÷ËÑË÷
+		if (text.StartsWith("-l")) {//é€šè¿‡æ¨¡ç»„åŠ è½½å™¨æœç´¢
             var condition = text.Replace("-l", "").TrimStart().ToLower();
 			endCores.AddRange(cores.Where(x =>
 			{
